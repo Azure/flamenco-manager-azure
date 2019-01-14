@@ -8,6 +8,7 @@
 
     - `id` = subscription ID
     - `tenantId` = Tentant ID
+- Run something to create the batch account.
 
 - Run `az ad sp create-for-rbac --sdk-auth > client_credentials.json`
 - Run `export AZURE_AUTH_LOCATION=$(pwd)/client_credentials.json`

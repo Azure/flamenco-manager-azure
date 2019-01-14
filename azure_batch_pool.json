@@ -1,7 +1,11 @@
 {
     "id": "je-moeder-47",
-    "displayName": "Je Moeder",
-    "vmSize": "standard_a1",
+
+    "vmSize": "Standard_D4_v3",
+    "maxTasksPerNode": 1,
+    "targetDedicatedNodes": 0,
+    "targetLowPriorityNodes": 1,
+
     "virtualMachineConfiguration": {
         "imageReference": {
             "publisher": "Canonical",
@@ -11,17 +15,16 @@
         },
         "nodeAgentSKUId": "batch.node.ubuntu 18.04"
     },
-    "maxTasksPerNode": 1,
-    "targetDedicatedNodes": 1,
+
     "startTask": {
         "resourceFiles": [
             {
-                "httpUrl": "https://raw.githubusercontent.com/lawrencegripper/azure-sdk-for-go-samples/1441a1dc4a6f7e47c4f6d8b537cf77ce4f7c452c/batch/examplestartup.sh",
-                "filePath": "echohello.sh",
-                "fileMode": "777"
+                "httpUrl": "https://www.flamenco.io/download/flamenco-worker-2.2.1-linux.tar.gz",
+                "filePath": "flamenco-worker-2.2.1-linux.tar.gz",
+                "fileMode": "640"
             }
         ],
-        "commandLine": "bash -f echohello.sh",
+        "commandLine": "bash -c 'echo ID; id; echo; echo PWD; pwd; echo; echo ENV; env | sort; echo; echo LS; ls -al'",
         "waitForSuccess": true,
         "userIdentity": {
             "autoUser": {

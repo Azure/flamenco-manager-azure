@@ -15,28 +15,37 @@ import (
 )
 
 const (
-	batchURL               = "https://flamenco.westeurope.batch.azure.com"
-	batchResourceGroupName = "cloud_01"
-	batchAccountName       = "flamenco"
-	batchPoolName          = "flamenco-workers"
-	batchParamFile         = "azure_batch_pool.json"
+	batchURL       = "https://flamenco.westeurope.batch.azure.com"
+	batchParamFile = "azure_batch_pool.json"
 )
 
 // Connect to the Azure Batch service.
 func Connect() {
-
-	// log.Debug("creating batch account client")
-	// accountClient := batch.NewAccountClient(batchURL)
-	// accountClient.Authorizer = authorizer
-	// accountClient.AddToUserAgent("je-moeder")
-	// accountClient.RequestInspector = azdebug.LogRequest()
-	// accountClient.ResponseInspector = azdebug.LogResponse()
-
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
 	defer cancel()
 
 	poolParams := poolParameters()
 	createPoolIfNotExist(ctx, poolParams)
+}
+
+func poolParameters() batch.PoolAddParameter {
+	logger := log.WithField("filename", batchParamFile)
+	paramFile, err := os.Open(batchParamFile)
+	if err != nil {
+		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
+	}
+	defer paramFile.Close()
+
+	params := batch.PoolAddParameter{}
+	decoder := json.NewDecoder(paramFile)
+	if err := decoder.Decode(&params); err != nil {
+		logger.WithError(err).Fatal("unable to decode Azure Batch pool parameters")
+	}
+
+	if params.ID == nil {
+		logger.Fatal("pool parameter 'id' must be set")
+	}
+	return params
 }
 
 func createPoolIfNotExist(ctx context.Context, poolParams batch.PoolAddParameter) {
@@ -65,7 +74,7 @@ func createPoolIfNotExist(ctx context.Context, poolParams batch.PoolAddParameter
 			log.WithError(err).Fatal("unable to get next page of pools")
 		}
 	}
-	logger.WithField("pool_exists", poolExists).Info("done listing pools")
+	logger.WithField("pool_exists", poolExists).Debug("done listing pools")
 
 	if poolExists {
 		logger.Debug("Azure Batch pool exists")
@@ -77,24 +86,4 @@ func createPoolIfNotExist(ctx context.Context, poolParams batch.PoolAddParameter
 		logger.WithError(err).Fatal("unable to add Azure Batch pool")
 	}
 	logger.Info("created Azure Batch pool")
-}
-
-func poolParameters() batch.PoolAddParameter {
-	logger := log.WithField("filename", batchParamFile)
-	paramFile, err := os.Open(batchParamFile)
-	if err != nil {
-		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
-	}
-	defer paramFile.Close()
-
-	params := batch.PoolAddParameter{}
-	decoder := json.NewDecoder(paramFile)
-	if err := decoder.Decode(&params); err != nil {
-		logger.WithError(err).Fatal("unable to decode Azure Batch pool parameters")
-	}
-
-	if params.ID == nil {
-		logger.Fatal("pool parameter 'id' must be set")
-	}
-	return params
 }
