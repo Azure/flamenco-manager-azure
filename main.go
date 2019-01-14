@@ -11,6 +11,7 @@ import (
 	stdlog "log"
 
 	log "github.com/sirupsen/logrus"
+	"gitlab.com/blender-institute/azure-go-test/azbatch"
 )
 
 const applicationName = "Azure Go Test"
@@ -102,6 +103,9 @@ func main() {
 		}
 	}()
 
+	azbatch.Connect()
+
+	go shutdown(os.Interrupt)
 	log.Info("Waiting for shutdown to complete.")
 	<-shutdownComplete
 }
