@@ -2,12 +2,13 @@ package azbatch
 
 import (
 	"context"
-	"fmt"
+	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
 	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/to"
+	"github.com/Azure/go-autorest/autorest/date"
 	"gitlab.com/blender-institute/azure-go-test/azauth"
 
 	log "github.com/sirupsen/logrus"
@@ -18,6 +19,7 @@ const (
 	batchResourceGroupName = "cloud_01"
 	batchAccountName       = "flamenco"
 	batchPoolName          = "flamenco-workers"
+	batchParamFile         = "azure_batch_pool.json"
 )
 
 // Connect to the Azure Batch service.
@@ -33,86 +35,66 @@ func Connect() {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
 	defer cancel()
 
-	createPoolIfNotExist(ctx, "je-moeder-47")
+	poolParams := poolParameters()
+	createPoolIfNotExist(ctx, poolParams)
 }
 
-func createPoolIfNotExist(ctx context.Context, poolID string) {
+func createPoolIfNotExist(ctx context.Context, poolParams batch.PoolAddParameter) {
+	logger := log.WithField("pool_id", *poolParams.ID)
+
 	poolClient := batch.NewPoolClient(batchURL)
 	poolClient.Authorizer = azauth.Load(azure.PublicCloud.BatchManagementEndpoint)
 
 	// poolClient.RequestInspector = azdebug.LogRequest()
 	// poolClient.ResponseInspector = azdebug.LogResponse()
 
-	filter := fmt.Sprintf("id eq '%s'", poolID)
-	log.WithField("filter", filter).Debug("listing all pools")
-
+	log.Debug("fetching pools")
 	poolExists := false
-
-	resultPage, err := poolClient.List(ctx, filter, "", "", nil, nil, nil, nil, nil)
+	resultPage, err := poolClient.List(ctx, "", "", "", nil, nil, nil, nil, nil)
 	if err != nil {
 		log.WithError(err).Fatal("unable to list existing pools")
 	}
+
 	for resultPage.NotDone() {
-		for _, poolParams := range resultPage.Values() {
-			log.WithField("ID", *poolParams.ID).Info("found Azure Batch pool")
-			poolExists = poolExists || (*poolParams.ID == poolID)
+		for _, foundPool := range resultPage.Values() {
+			log.WithField("found_id", *foundPool.ID).Info("found existing Azure Batch pool")
+			poolExists = poolExists || (*foundPool.ID == *poolParams.ID)
 		}
 		err := resultPage.NextWithContext(ctx)
 		if err != nil {
 			log.WithError(err).Fatal("unable to get next page of pools")
 		}
 	}
-	log.Info("done listing pools")
+	logger.WithField("pool_exists", poolExists).Info("done listing pools")
 
 	if poolExists {
-		log.WithField("pool_id", poolID).Debug("Azure Batch pool exists")
+		logger.Debug("Azure Batch pool exists")
 		return
 	}
 
-	createPool(ctx, poolID, poolClient)
-}
-
-func createPool(ctx context.Context, poolID string, poolClient batch.PoolClient) {
-	logger := log.WithField("pool_id", poolID)
-
-	toCreate := batch.PoolAddParameter{
-		ID: &poolID,
-		VirtualMachineConfiguration: &batch.VirtualMachineConfiguration{
-			ImageReference: &batch.ImageReference{
-				Publisher: to.StringPtr("Canonical"),
-				Sku:       to.StringPtr("18.04-LTS"),
-				Offer:     to.StringPtr("UbuntuServer"),
-				Version:   to.StringPtr("latest"),
-			},
-			NodeAgentSKUID: to.StringPtr("batch.node.ubuntu 18.04"),
-		},
-		MaxTasksPerNode:      to.Int32Ptr(1),
-		TargetDedicatedNodes: to.Int32Ptr(1),
-
-		// Create a startup task to run a script on each pool machine
-		StartTask: &batch.StartTask{
-			ResourceFiles: &[]batch.ResourceFile{
-				{
-					HTTPURL:  to.StringPtr("https://raw.githubusercontent.com/lawrencegripper/azure-sdk-for-go-samples/1441a1dc4a6f7e47c4f6d8b537cf77ce4f7c452c/batch/examplestartup.sh"),
-					FilePath: to.StringPtr("echohello.sh"),
-					FileMode: to.StringPtr("777"),
-				},
-			},
-			CommandLine:    to.StringPtr("bash -f echohello.sh"),
-			WaitForSuccess: to.BoolPtr(true),
-			UserIdentity: &batch.UserIdentity{
-				AutoUser: &batch.AutoUserSpecification{
-					ElevationLevel: batch.Admin,
-					Scope:          batch.Task,
-				},
-			},
-		},
-		VMSize: to.StringPtr("standard_a1"),
-	}
-
-	_, err := poolClient.Add(ctx, toCreate, nil, nil, nil, nil)
+	_, err = poolClient.Add(ctx, poolParams, nil, nil, nil, &date.TimeRFC1123{Time: time.Now()})
 	if err != nil {
 		logger.WithError(err).Fatal("unable to add Azure Batch pool")
 	}
 	logger.Info("created Azure Batch pool")
+}
+
+func poolParameters() batch.PoolAddParameter {
+	logger := log.WithField("filename", batchParamFile)
+	paramFile, err := os.Open(batchParamFile)
+	if err != nil {
+		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
+	}
+	defer paramFile.Close()
+
+	params := batch.PoolAddParameter{}
+	decoder := json.NewDecoder(paramFile)
+	if err := decoder.Decode(&params); err != nil {
+		logger.WithError(err).Fatal("unable to decode Azure Batch pool parameters")
+	}
+
+	if params.ID == nil {
+		logger.Fatal("pool parameter 'id' must be set")
+	}
+	return params
 }

@@ -1,0 +1,33 @@
+{
+    "id": "je-moeder-47",
+    "displayName": "Je Moeder",
+    "vmSize": "standard_a1",
+    "virtualMachineConfiguration": {
+        "imageReference": {
+            "publisher": "Canonical",
+            "sku": "18.04-LTS",
+            "offer": "UbuntuServer",
+            "version": "latest"
+        },
+        "nodeAgentSKUId": "batch.node.ubuntu 18.04"
+    },
+    "maxTasksPerNode": 1,
+    "targetDedicatedNodes": 1,
+    "startTask": {
+        "resourceFiles": [
+            {
+                "httpUrl": "https://raw.githubusercontent.com/lawrencegripper/azure-sdk-for-go-samples/1441a1dc4a6f7e47c4f6d8b537cf77ce4f7c452c/batch/examplestartup.sh",
+                "filePath": "echohello.sh",
+                "fileMode": "777"
+            }
+        ],
+        "commandLine": "bash -f echohello.sh",
+        "waitForSuccess": true,
+        "userIdentity": {
+            "autoUser": {
+                "elevationLevel": "NonAdmin",
+                "scope": "task"
+            }
+        }
+    }
+}
