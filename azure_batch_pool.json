@@ -16,19 +16,30 @@
         "nodeAgentSKUId": "batch.node.ubuntu 18.04"
     },
 
+    "applicationPackageReferences": [
+        {"applicationId": "flamenco-worker"},
+        {"applicationId": "blender"},
+        {"applicationId": "ffmpeg"}
+    ],
+
     "startTask": {
         "resourceFiles": [
             {
-                "httpUrl": "https://www.flamenco.io/download/flamenco-worker-2.2.1-linux.tar.gz",
-                "filePath": "flamenco-worker-2.2.1-linux.tar.gz",
-                "fileMode": "640"
+                "httpUrl": "https://www.flamenco.io/azure/flamenco-worker-startup.sh",
+                "filePath": "flamenco-worker-startup.sh",
+                "fileMode": "750"
+            },
+            {
+                "httpUrl": "https://www.flamenco.io/azure/flamenco-worker.cfg",
+                "filePath": "flamenco-worker.cfg",
+                "fileMode": "644"
             }
         ],
-        "commandLine": "bash -c 'echo ID; id; echo; echo PWD; pwd; echo; echo ENV; env | sort; echo; echo LS; ls -al'",
+        "commandLine": "bash flamenco-worker-startup.sh",
         "waitForSuccess": true,
         "userIdentity": {
             "autoUser": {
-                "elevationLevel": "NonAdmin",
+                "elevationLevel": "Admin",
                 "scope": "task"
             }
         }
