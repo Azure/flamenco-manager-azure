@@ -1,6 +1,8 @@
 package azauth
 
 import (
+	"os"
+
 	log "github.com/sirupsen/logrus"
 
 	"github.com/Azure/go-autorest/autorest"
@@ -9,13 +11,23 @@ import (
 
 // Load authorisation details from azure.PublicCloud.XXXManagementEndpoint URLs
 func Load(url string) autorest.Authorizer {
-	log.Info("loading auth file from AZURE_AUTH_LOCATION")
+	fileloc := os.Getenv("AZURE_AUTH_LOCATION")
+	if fileloc == "" {
+		fileloc = "client_credentials.json"
+		err := os.Setenv("AZURE_AUTH_LOCATION", fileloc)
+		if err != nil {
+			log.WithError(err).Fatal("unable to set AZURE_AUTH_LOCATION environment variable")
+		}
+	}
+
+	logger := log.WithField("auth_file", fileloc)
+	logger.Info("loading credentials file")
+
 	authorizer, err := auth.NewAuthorizerFromFileWithResource(url)
 	if err != nil {
-		log.WithFields(log.Fields{
+		logger.WithFields(log.Fields{
 			log.ErrorKey: err,
-			"url":        url,
-			"env_var":    "AZURE_AUTH_LOCATION",
+			"auth_url":   url,
 		}).Fatal("unable to load authorization file")
 	}
 	return authorizer

@@ -3,8 +3,11 @@ package azbatch
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
 	"time"
+
+	"gitlab.com/blender-institute/azure-go-test/azconfig"
 
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -15,17 +18,22 @@ import (
 )
 
 const (
-	batchURL       = "https://flamenco.westeurope.batch.azure.com"
 	batchParamFile = "azure_batch_pool.json"
 )
 
-// Connect to the Azure Batch service.
-func Connect() {
+// CreatePool starts a pool of Flamenco Workers.
+func CreatePool(config azconfig.AZConfig) {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
 	defer cancel()
 
 	poolParams := poolParameters()
-	createPoolIfNotExist(ctx, poolParams)
+	batchURL := constructBatchURL(config)
+
+	createPoolIfNotExist(ctx, batchURL, poolParams)
+}
+
+func constructBatchURL(config azconfig.AZConfig) string {
+	return fmt.Sprintf("https://%s.%s.batch.azure.com", config.BatchName, config.Location)
 }
 
 func poolParameters() batch.PoolAddParameter {
@@ -48,12 +56,11 @@ func poolParameters() batch.PoolAddParameter {
 	return params
 }
 
-func createPoolIfNotExist(ctx context.Context, poolParams batch.PoolAddParameter) {
+func createPoolIfNotExist(ctx context.Context, batchURL string, poolParams batch.PoolAddParameter) {
 	logger := log.WithField("pool_id", *poolParams.ID)
 
 	poolClient := batch.NewPoolClient(batchURL)
 	poolClient.Authorizer = azauth.Load(azure.PublicCloud.BatchManagementEndpoint)
-
 	// poolClient.RequestInspector = azdebug.LogRequest()
 	// poolClient.ResponseInspector = azdebug.LogResponse()
 

@@ -16,6 +16,10 @@
         "nodeAgentSKUId": "batch.node.ubuntu 18.04"
     },
 
+    "networkConfiguration": {
+        "subnetId": "/subscriptions/5f6014d1-1ddb-4c14-8ef5-d4aab6636ba2/resourceGroups/cloud_01/providers/Microsoft.Network/virtualNetworks/cloud_01-vnet/subnets/default"
+    },
+
     "applicationPackageReferences": [
         {"applicationId": "flamenco-worker"},
         {"applicationId": "blender"},
@@ -25,12 +29,12 @@
     "startTask": {
         "resourceFiles": [
             {
-                "httpUrl": "https://www.flamenco.io/azure/flamenco-worker-startup.sh",
+                "httpUrl": "http://vm-flamenco-manager:8083/azure/flamenco-worker-startup.sh",
                 "filePath": "flamenco-worker-startup.sh",
                 "fileMode": "750"
             },
             {
-                "httpUrl": "https://www.flamenco.io/azure/flamenco-worker.cfg",
+                "httpUrl": "http://vm-flamenco-manager:8083/azure/flamenco-worker.cfg",
                 "filePath": "flamenco-worker.cfg",
                 "fileMode": "644"
             }

@@ -7,6 +7,60 @@ document is a nice place to start reading about Azure Batch. This document is al
 "Develop large-scale parallel compute solutions with Batch" and "Developer features".
 
 
+## Initial setup for Azure
+
+- Install the [Azure CLI client](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest).
+- Run `az login` and log in via your browser. Later you can run `az account list` to show the same info.
+  The `id` field in the shown JSON is the subscription ID used below.
+- Create an Azure Resource Group. This will hold all resources, like virtual
+  machines, shared storage, network configuration, etc. Also configure the
+  Azure CLI to set the location and resource group as default so that you
+  don't have to specify them all the time.
+
+      az group create --location westeurope --name myResourceGroup
+
+- Configure the above settings as defaults for future Azure CLI calls:
+
+      az account set -s 'subscription ID'
+      az configure --defaults location=westeurope group=myResourceGroup
+
+
+## Azure VM side of things
+
+Create a VM for Flamenco Manager:
+
+    az vm create --name vm-flamenco-manager --image Canonical:UbuntuServer:18.04-LTS:18.04.201901140 --admin-username azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)"
+
+To get the IP address later, use:
+
+    az network public-ip list --query [].ipAddress
+
+To replace the SSH key that's allowed to log in on the VM, use:
+
+    az vm user update -u azureuser --ssh-key-value "$(< ~/.ssh/id_rsa.pub)" -n vm-flamenco-manager
+
+where `vm-flamenco-manager` is the name of the VM created earlier.
+
+List your virtual network subnet IDs like this:
+
+    az network vnet list
+
+Update `azure_batch_pool.json` so that it has the default subnet ID configured in the `networkConfiguration/subnetId` key.
+
+
+## Installing Flamenco Manager on the VM
+
+On the above-installed VM, run the following commands (source: [MongoDB installation manual](https://docs.mongodb.com/manual/tutorial/install-mongodb-on-ubuntu/))
+as root:
+
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+    echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.0.list
+    apt-get update
+    apt-get install -y mongodb-org
+    systemctl enable mongod.service
+    systemctl start mongod.service
+
+
 ## Azure Batch Explorer side of things
 
 - Create a Batch account called `flamenco`. It's very likely that this name is
@@ -29,22 +83,15 @@ document is a nice place to start reading about Azure Batch. This document is al
 
 ## Get going with this Go code
 
-- Install the [Azure CLI client](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest).
-- Run `az login` and log in via your browser. Later you can run `az account list` to show the same info.
-  The fields in the shown JSON map as follows:
-
-    - `id` = subscription ID
-    - `tenantId` = Tentant ID
-- Run something to create the batch account.
-
 - Run `az ad sp create-for-rbac --sdk-auth > client_credentials.json`
 - Run `export AZURE_AUTH_LOCATION=$(pwd)/client_credentials.json`
 
 - Install [dep](https://github.com/golang/dep#installation)
 - Run `dep ensure`
 
+To run this example, run:
 
-To run this example, run `go install` and then `azure-go-test -debug`.
+    rsync -va flamenco-worker* flamenco.io:flamenco.io/azure/ && go install && azure-go-test -debug
 
 
 ## To get more info

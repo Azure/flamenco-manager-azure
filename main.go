@@ -12,6 +12,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azbatch"
+	"gitlab.com/blender-institute/azure-go-test/azconfig"
 )
 
 const applicationName = "Azure Go Test"
@@ -103,7 +104,8 @@ func main() {
 		}
 	}()
 
-	azbatch.Connect()
+	config := azconfig.Load()
+	azbatch.CreatePool(config)
 
 	go shutdown(os.Interrupt)
 	log.Info("Waiting for shutdown to complete.")
