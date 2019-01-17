@@ -24,6 +24,16 @@ document is a nice place to start reading about Azure Batch. This document is al
       az account set -s 'subscription ID'
       az configure --defaults location=westeurope group=myResourceGroup
 
+- Create a Batch account with `az batch account create --name baflamenco`
+  (but probably that name is already taken, so pick one that's unique for you).
+  You don't need to have `ba` in the name, but we do in this document to
+  make it clear what is referencing to the batch account.
+- Create a Storage account with `az storage account create --name saflamenco`
+  You don't need to have `sa` in the name, but we do in this document to
+  make it clear what is referencing to the storage account.
+- Update `azure_config.json` with the information you used in the previous
+  steps. See the `AZConfig` struct in `azconfig/azconfig.json` for explanation.
+
 
 ## Azure VM side of things
 
@@ -62,10 +72,6 @@ as root:
 
 
 ## Azure Batch Explorer side of things
-
-- Create a Batch account called `flamenco`. It's very likely that this name is
-  already taken now that we have used it. Update the URL in `azbatch/azbatch.go`
-  to match.
 
 - Create application packages for Blender, FFMpeg, and Flamenco Worker.
     - MUST be ZIP files. Remember that ZIP files do not support symlinks.
@@ -113,6 +119,8 @@ To run this example, run:
     - `/mnt/batch/tasks/shared`: this is *not* shared between VMs, but shared
       between tasks on that VM.
     - For more info see [Files and Directories](https://docs.microsoft.com/en-us/azure/batch/batch-api-basics#files-and-directories).
+- `/var/lib/waagent` contains info from the Azure Agent, like the assigned
+  hostname, configuration settings, TLS certificates, etc.
 - If the pool is configured to run the startup task as `NonAdmin`, it uses
   uid=1001(_azbatchtask_start) gid=1000(_azbatchgrp) groups=1000(_azbatchgrp).
 

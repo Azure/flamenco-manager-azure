@@ -29,12 +29,12 @@
     "startTask": {
         "resourceFiles": [
             {
-                "httpUrl": "http://vm-flamenco-manager:8083/azure/flamenco-worker-startup.sh",
+                "httpUrl": "http://vm-flamenco-manager:8083/static/azure/flamenco-worker-startup.sh",
                 "filePath": "flamenco-worker-startup.sh",
                 "fileMode": "750"
             },
             {
-                "httpUrl": "http://vm-flamenco-manager:8083/azure/flamenco-worker.cfg",
+                "httpUrl": "http://vm-flamenco-manager:8083/static/azure/flamenco-worker.cfg",
                 "filePath": "flamenco-worker.cfg",
                 "fileMode": "644"
             }

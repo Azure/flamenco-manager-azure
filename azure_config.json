@@ -1,5 +1,6 @@
 {
     "resourceGroup": "cloud_01",
-    "batchName": "flamenco",
+    "batchAccountName": "baflamenco",
+    "storageAccountName": "saflamenco",
     "location": "westeurope"
 }

@@ -15,8 +15,10 @@ const (
 type AZConfig struct {
 	// Name of the resource group that will contain the Flamenco infrastructure.
 	ResourceGroup string `json:"resourceGroup"`
-	// Name of the Azure Batch that will contain the Flamenco Worker VM pool.
-	BatchName string `json:"batchName"`
+	// Name of the Azure Batch account that will contain the Flamenco Worker VM pool.
+	BatchAccountName string `json:"batchAccountName"`
+	// Name of the Azure Storage account that will contain the Flamenco files.
+	StorageAccountName string `json:"storageAccountName"`
 	// Physical location of the resource group, such as 'westeurope' or 'eastus'.
 	Location string `json:"location"`
 }
@@ -39,8 +41,11 @@ func Load() AZConfig {
 	if params.ResourceGroup == "" {
 		logger.Fatal("property 'resourceGroup' must be set")
 	}
-	if params.BatchName == "" {
-		logger.Fatal("property 'batchName' must be set")
+	if params.BatchAccountName == "" {
+		logger.Fatal("property 'batchAccountName' must be set")
+	}
+	if params.StorageAccountName == "" {
+		logger.Fatal("property 'storageAccountName' must be set")
 	}
 	if params.Location == "" {
 		logger.Fatal("property 'location' must be set")
