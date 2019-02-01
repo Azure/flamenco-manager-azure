@@ -33,7 +33,7 @@ func CreatePool(config azconfig.AZConfig) {
 }
 
 func constructBatchURL(config azconfig.AZConfig) string {
-	return fmt.Sprintf("https://%s.%s.batch.azure.com", config.BatchName, config.Location)
+	return fmt.Sprintf("https://%s.%s.batch.azure.com", config.BatchAccountName, config.Location)
 }
 
 func poolParameters() batch.PoolAddParameter {
