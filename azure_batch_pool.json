@@ -27,19 +27,7 @@
     ],
 
     "startTask": {
-        "resourceFiles": [
-            {
-                "httpUrl": "http://vm-flamenco-manager:8083/static/azure/flamenco-worker-startup.sh",
-                "filePath": "flamenco-worker-startup.sh",
-                "fileMode": "750"
-            },
-            {
-                "httpUrl": "http://vm-flamenco-manager:8083/static/azure/flamenco-worker.cfg",
-                "filePath": "flamenco-worker.cfg",
-                "fileMode": "644"
-            }
-        ],
-        "commandLine": "bash flamenco-worker-startup.sh",
+        "commandLine": "bash -exc 'sudo mkdir /mnt/flamenco-resources; sudo mount -t cifs //{STORAGE_ACCOUNT}.file.core.windows.net/flamenco-resources /mnt/flamenco-resources -o vers=3.0,username={STORAGE_ACCOUNT},password={STORAGE_KEY},dir_mode=0777,file_mode=0666,sec=ntlmssp; bash -ex /mnt/flamenco-resources/flamenco-worker-startup.sh'",
         "waitForSuccess": true,
         "userIdentity": {
             "autoUser": {

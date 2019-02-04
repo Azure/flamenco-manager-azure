@@ -46,7 +46,7 @@ ln -s $AZ_BATCH_APP_PACKAGE_blender /mnt/batch/tasks/applications/blender
 ln -s $AZ_BATCH_APP_PACKAGE_ffmpeg /mnt/batch/tasks/applications/ffmpeg
 
 echo === Setting up Flamenco Worker ===
-cp $AZ_BATCH_TASK_WORKING_DIR/flamenco-worker.cfg $AZ_BATCH_NODE_SHARED_DIR
+cp /mnt/flamenco-resources/flamenco-worker.cfg $AZ_BATCH_NODE_SHARED_DIR
 
 echo === Installing Flamenco Worker service ===
 cat > flamenco-worker.service <<EOT

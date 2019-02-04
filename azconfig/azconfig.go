@@ -13,6 +13,8 @@ const (
 
 // AZConfig is loaded from azure_config.json
 type AZConfig struct {
+	// ID of the Azure subscription. It is the "id" field shown by `az account list`
+	SubscriptionID string `json:"subscriptionID"`
 	// Name of the resource group that will contain the Flamenco infrastructure.
 	ResourceGroup string `json:"resourceGroup"`
 	// Name of the Azure Batch account that will contain the Flamenco Worker VM pool.

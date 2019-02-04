@@ -20,14 +20,14 @@ func Load(url string) autorest.Authorizer {
 		}
 	}
 
-	logger := log.WithField("auth_file", fileloc)
-	logger.Info("loading credentials file")
+	logger := log.WithField("authFile", fileloc)
+	logger.Debug("loading credentials file")
 
 	authorizer, err := auth.NewAuthorizerFromFileWithResource(url)
 	if err != nil {
 		logger.WithFields(log.Fields{
 			log.ErrorKey: err,
-			"auth_url":   url,
+			"authURL":    url,
 		}).Fatal("unable to load authorization file")
 	}
 	return authorizer

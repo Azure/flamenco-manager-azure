@@ -1,6 +1,7 @@
 {
+    "subscriptionID": "5f6014d1-1ddb-4c14-8ef5-d4aab6636ba2",
     "resourceGroup": "cloud_01",
-    "batchAccountName": "baflamenco",
-    "storageAccountName": "saflamenco",
+    "batchAccountName": "flamenco",
+    "storageAccountName": "cloud01diag",
     "location": "westeurope"
 }

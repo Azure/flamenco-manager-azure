@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -13,6 +14,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azbatch"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
+	"gitlab.com/blender-institute/azure-go-test/azstorage"
 )
 
 const applicationName = "Azure Go Test"
@@ -24,15 +26,17 @@ const applicationVersion = "1.0"
 var shutdownComplete chan struct{}
 
 var cliArgs struct {
-	version bool
-	verbose bool
-	debug   bool
+	version        bool
+	verbose        bool
+	debug          bool
+	showStartupCLI bool
 }
 
 func parseCliArgs() {
 	flag.BoolVar(&cliArgs.version, "version", false, "Shows the application version, then exits.")
 	flag.BoolVar(&cliArgs.verbose, "verbose", false, "Enable info-level logging.")
 	flag.BoolVar(&cliArgs.debug, "debug", false, "Enable debug-level logging.")
+	flag.BoolVar(&cliArgs.showStartupCLI, "startupCLI", false, "Just show the startup task CLI, do not start the pool.")
 	flag.Parse()
 }
 
@@ -105,6 +109,17 @@ func main() {
 	}()
 
 	config := azconfig.Load()
+	if cliArgs.showStartupCLI {
+		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
+		defer cancel()
+
+		poolParams := azbatch.PoolParameters()
+		withCreds := azstorage.ReplaceAccountDetails(ctx, config, poolParams)
+		fmt.Println(*withCreds.StartTask.CommandLine)
+		log.Info("shutting down after logging account storage key stuff")
+		return
+	}
+
 	azbatch.CreatePool(config)
 
 	go shutdown(os.Interrupt)

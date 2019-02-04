@@ -7,6 +7,8 @@ import (
 	"os"
 	"time"
 
+	"gitlab.com/blender-institute/azure-go-test/azstorage"
+
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
@@ -26,9 +28,10 @@ func CreatePool(config azconfig.AZConfig) {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
 	defer cancel()
 
-	poolParams := poolParameters()
-	batchURL := constructBatchURL(config)
+	poolParams := PoolParameters()
+	poolParams = azstorage.ReplaceAccountDetails(ctx, config, poolParams)
 
+	batchURL := constructBatchURL(config)
 	createPoolIfNotExist(ctx, batchURL, poolParams)
 }
 
@@ -36,7 +39,8 @@ func constructBatchURL(config azconfig.AZConfig) string {
 	return fmt.Sprintf("https://%s.%s.batch.azure.com", config.BatchAccountName, config.Location)
 }
 
-func poolParameters() batch.PoolAddParameter {
+// PoolParameters loads batchParamFile and returns it parsed.
+func PoolParameters() batch.PoolAddParameter {
 	logger := log.WithField("filename", batchParamFile)
 	paramFile, err := os.Open(batchParamFile)
 	if err != nil {
