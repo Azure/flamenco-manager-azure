@@ -28,6 +28,10 @@
 
     "startTask": {
         "commandLine": "bash -exc 'sudo mkdir -p /mnt/flamenco-resources; sudo mount -t cifs //{STORAGE_ACCOUNT}.file.core.windows.net/flamenco-resources /mnt/flamenco-resources -o vers=3.0,username={STORAGE_ACCOUNT},password={STORAGE_KEY},dir_mode=0777,file_mode=0666,sec=ntlmssp,mfsymlinks; bash -ex /mnt/flamenco-resources/flamenco-worker-startup.sh'",
+        "environmentSettings": [
+            {"name": "FLAMENCO_AZ_STORAGE_ACCOUNT", "value": "{STORAGE_ACCOUNT}"},
+            {"name": "FLAMENCO_AZ_STORAGE_KEY", "value": "{STORAGE_KEY}"}
+        ],
         "waitForSuccess": true,
         "userIdentity": {
             "autoUser": {

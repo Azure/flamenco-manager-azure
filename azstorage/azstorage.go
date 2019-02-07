@@ -19,7 +19,7 @@ func client(config azconfig.AZConfig) storage.AccountsClient {
 }
 
 // ReplaceAccountDetails performs replacement of STORAGE_ACCOUNT and STORAGE_KEY variables.
-// The replacement is only done in the startup task command line.
+// The replacement is only done in the startup task command line and environment variables.
 func ReplaceAccountDetails(ctx context.Context, config azconfig.AZConfig, poolParams batch.PoolAddParameter) batch.PoolAddParameter {
 	var startupCLI string
 
@@ -58,11 +58,24 @@ func ReplaceAccountDetails(ctx context.Context, config azconfig.AZConfig, poolPa
 		logger.WithField("keyName", *storageKey.KeyName).Fatal("storage key has no value")
 	}
 
+	// Update the startup task commandline.
 	startupCLI = *poolParams.StartTask.CommandLine
 	startupCLI = strings.Replace(startupCLI, "{STORAGE_ACCOUNT}", accountName, -1)
 	startupCLI = strings.Replace(startupCLI, "{STORAGE_KEY}", *storageKey.Value, -1)
-
 	poolParams.StartTask.CommandLine = &startupCLI
+
+	// Update the startup task environment variables.
+	if poolParams.StartTask.EnvironmentSettings != nil {
+		environment := *poolParams.StartTask.EnvironmentSettings
+		for index, envVar := range environment {
+			if envVar.Value == nil {
+				continue
+			}
+			value := strings.Replace(*envVar.Value, "{STORAGE_ACCOUNT}", accountName, -1)
+			value = strings.Replace(value, "{STORAGE_KEY}", *storageKey.Value, -1)
+			environment[index].Value = &value
+		}
+	}
 
 	return poolParams
 }

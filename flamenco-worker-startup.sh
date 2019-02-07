@@ -5,6 +5,8 @@ set -e
 
 # Environment variables like these are set during the startup task:
 #
+#     FLAMENCO_AZ_STORAGE_ACCOUNT=saflamenco
+#     FLAMENCO_AZ_STORAGE_KEY=afdliGF3ADdsf4f98fvklcvh1/4+1f93FBA==
 #     AZ_BATCH_ACCOUNT_NAME=flamenco
 #     AZ_BATCH_ACCOUNT_URL=https://flamenco.westeurope.batch.azure.com/
 #     AZ_BATCH_APP_PACKAGE_blender=/mnt/batch/tasks/applications/blender2.80-daily-2019-10-142019-01-15-09-19
