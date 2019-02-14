@@ -40,10 +40,19 @@ echo ENV; env | sort
 echo
 echo
 
+echo === Installing requirements to run Blender ===
+apt-get update
+apt-get install libgl1-mesa libglu1-mesa libx11 libxi6 libxrender1 -y
+
+echo === Preparing Blender Animation Studio infrastructure ===
+mkdir -p /render
+mount -t cifs //${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render \
+    -o "vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0777,file_mode=0666,sec=ntlmssp,mfsymlinks"
+
 echo === Symlinking applications ===
-ln -s $AZ_BATCH_APP_PACKAGE_flamenco_worker /mnt/batch/tasks/applications/flamenco-worker
-ln -s $AZ_BATCH_APP_PACKAGE_blender /mnt/batch/tasks/applications/blender
-ln -s $AZ_BATCH_APP_PACKAGE_ffmpeg /mnt/batch/tasks/applications/ffmpeg
+ln -sf $AZ_BATCH_APP_PACKAGE_flamenco_worker /mnt/batch/tasks/applications/flamenco-worker
+ln -sf $AZ_BATCH_APP_PACKAGE_blender /mnt/batch/tasks/applications/blender
+ln -sf $AZ_BATCH_APP_PACKAGE_ffmpeg /mnt/batch/tasks/applications/ffmpeg
 
 echo === Setting up Flamenco Worker ===
 cp /mnt/flamenco-resources/flamenco-worker.cfg $AZ_BATCH_NODE_SHARED_DIR
