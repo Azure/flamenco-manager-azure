@@ -3,7 +3,11 @@
 # Abort when an error occurs.
 set -e
 
-# Environment variables like these are set during the startup task:
+# Environment variables like these are set during the startup task.
+#
+# These are *NOT* available when SSH'ing into the machine, so that is why some
+# parts of this script check for existence of those variables before using
+# them.
 #
 #     FLAMENCO_AZ_STORAGE_ACCOUNT=saflamenco
 #     FLAMENCO_AZ_STORAGE_KEY=afdliGF3ADdsf4f98fvklcvh1/4+1f93FBA==
@@ -42,25 +46,47 @@ echo ENV; env | sort
 echo
 echo
 
-echo === Installing requirements to run Blender ===
+echo === Installing Requirements to run Blender ===
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
-apt-get install libgl1-mesa libglu1-mesa libx11 libxi6 libxrender1 -y
+apt-get install libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxi6 libxrender1 -y
 
-echo === Preparing Blender Animation Studio infrastructure ===
-mkdir -p /render
-mount -t cifs //${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render \
-    -o "vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0777,file_mode=0666,sec=ntlmssp,mfsymlinks"
+if [ -z "${FLAMENCO_AZ_STORAGE_ACCOUNT}" ]; then
+    echo +++ SKIPPING Preparing Blender Animation Studio infrastructure +++
+else
+    echo === Preparing Blender Animation Studio infrastructure ===
+    mkdir -p /render
+    mount -t cifs //${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render \
+        -o "vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0777,file_mode=0666,sec=ntlmssp,mfsymlinks"
+fi
 
-echo === Symlinking applications ===
-ln -sf $AZ_BATCH_APP_PACKAGE_flamenco_worker /mnt/batch/tasks/applications/flamenco-worker
-ln -sf $AZ_BATCH_APP_PACKAGE_blender /mnt/batch/tasks/applications/blender
-ln -sf $AZ_BATCH_APP_PACKAGE_ffmpeg /mnt/batch/tasks/applications/ffmpeg
+if [ -z "$AZ_BATCH_APP_PACKAGE_flamenco_worker" ]; then
+    echo +++ SKIPPING Symlinking applications +++
+else
+    echo === Symlinking applications ===
+    ln -sf $AZ_BATCH_APP_PACKAGE_flamenco_worker /mnt/batch/tasks/applications/flamenco-worker
+    ln -sf $AZ_BATCH_APP_PACKAGE_blender /mnt/batch/tasks/applications/blender
+    ln -sf $AZ_BATCH_APP_PACKAGE_ffmpeg /mnt/batch/tasks/applications/ffmpeg
+fi
 
-echo === Setting up Flamenco Worker ===
-cp /mnt/flamenco-resources/flamenco-worker.cfg $AZ_BATCH_NODE_SHARED_DIR
+echo === Installing Azure Preempt Monitor service ===
+systemctl stop azure-preempt-monitor.service || true
+cp /mnt/flamenco-resources/azure-preempt-monitor /usr/local/bin
+cp /mnt/flamenco-resources/azure-preempt-monitor.service /etc/systemd/system
+echo "daemon   ALL = NOPASSWD: /bin/systemctl" > /etc/sudoers.d/50-azure-preempt-monitor
+chmod 755 /usr/local/bin/azure-preempt-monitor
+systemctl daemon-reload
+systemctl enable azure-preempt-monitor.service
+systemctl start azure-preempt-monitor.service
 
-echo === Installing Flamenco Worker service ===
-cat > flamenco-worker.service <<EOT
+if [ -z "$AZ_BATCH_NODE_SHARED_DIR" ]; then
+    echo +++ SKIPPING Setting up Flamenco Worker +++
+else
+    echo === Setting up Flamenco Worker ===
+    cp /mnt/flamenco-resources/flamenco-worker.cfg $AZ_BATCH_NODE_SHARED_DIR
+
+    echo === Installing Flamenco Worker service ===
+    cat > flamenco-worker.service <<EOT
 # systemd service description for Flamenco Worker
 
 [Unit]
@@ -85,11 +111,12 @@ EnvironmentFile=-/etc/default/locale
 [Install]
 WantedBy=multi-user.target
 EOT
-sudo cp flamenco-worker.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable flamenco-worker
+    cp flamenco-worker.service /etc/systemd/system/
+    systemctl daemon-reload
+    systemctl enable flamenco-worker
+fi
 
 echo === Starting Flamenco Worker service ===
-sudo systemctl start flamenco-worker
+systemctl start flamenco-worker
 
 echo === Startup Task Complete ===
