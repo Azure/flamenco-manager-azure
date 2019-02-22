@@ -57,7 +57,6 @@ fi
 
 groupadd --force flamenco  # --force makes sure it doesn't fail when the group already exists
 adduser _azbatch flamenco
-adduser batchexplorer-user flamenco
 adduser $USER flamenco
 
 if [ -z "${FLAMENCO_AZ_STORAGE_ACCOUNT}" ]; then
@@ -65,8 +64,17 @@ if [ -z "${FLAMENCO_AZ_STORAGE_ACCOUNT}" ]; then
 else
     echo === Preparing Blender Animation Studio infrastructure ===
     mkdir -p /render
-    mount -t cifs //${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render \
-        -o "vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0775,file_mode=0664,gid=flamenco,forcegid,sec=ntlmssp,mfsymlinks"
+
+    # Remove existing entry for /render from fstab
+    sed '/ \/render /d' -i /etc/fstab
+
+    # Create a new entry so we're sure the storage account credentials are ok.
+    echo "//${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render cifs vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0775,file_mode=0664,gid=flamenco,forcegid,sec=ntlmssp,mfsymlinks 0 0" >> /etc/fstab
+
+    # If mounted, unmount.
+    grep ' /render ' /proc/mounts && umount /render
+
+    mount /render
 fi
 
 if [ -z "$AZ_BATCH_APP_PACKAGE_flamenco_worker" ]; then
