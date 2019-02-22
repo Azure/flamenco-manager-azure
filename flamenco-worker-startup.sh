@@ -69,7 +69,7 @@ else
     sed '/ \/render /d' -i /etc/fstab
 
     # Create a new entry so we're sure the storage account credentials are ok.
-    echo "//${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render cifs vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0775,file_mode=0664,gid=flamenco,forcegid,sec=ntlmssp,mfsymlinks 0 0" >> /etc/fstab
+    echo "//${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render cifs vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0775,file_mode=0664,uid=_azbatch,forceuid,gid=_azbatchgrp,forcegid,sec=ntlmssp,mfsymlinks 0 0" >> /etc/fstab
 
     # If mounted, unmount.
     grep ' /render ' /proc/mounts && umount /render
