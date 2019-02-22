@@ -46,10 +46,19 @@ echo ENV; env | sort
 echo
 echo
 
-echo === Installing Requirements to run Blender ===
-export DEBIAN_FRONTEND=noninteractive
-apt-get update
-apt-get install libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxi6 libxrender1 -y
+if [ -z "${AZ_BATCH_TASK_USER}" ]; then
+    echo +++ SKIPPING Installing Requirements to run Blender +++
+else
+    echo === Installing Requirements to run Blender ===
+    export DEBIAN_FRONTEND=noninteractive
+    apt-get update
+    apt-get install libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxi6 libxrender1 -y
+fi
+
+groupadd --force flamenco  # --force makes sure it doesn't fail when the group already exists
+adduser _azbatch flamenco
+adduser batchexplorer-user flamenco
+adduser $USER flamenco
 
 if [ -z "${FLAMENCO_AZ_STORAGE_ACCOUNT}" ]; then
     echo +++ SKIPPING Preparing Blender Animation Studio infrastructure +++
@@ -57,7 +66,7 @@ else
     echo === Preparing Blender Animation Studio infrastructure ===
     mkdir -p /render
     mount -t cifs //${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render \
-        -o "vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0777,file_mode=0666,sec=ntlmssp,mfsymlinks"
+        -o "vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0775,file_mode=0664,gid=flamenco,forcegid,sec=ntlmssp,mfsymlinks"
 fi
 
 if [ -z "$AZ_BATCH_APP_PACKAGE_flamenco_worker" ]; then
