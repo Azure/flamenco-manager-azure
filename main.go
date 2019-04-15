@@ -13,6 +13,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azbatch"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
+	"gitlab.com/blender-institute/azure-go-test/azresource"
 	"gitlab.com/blender-institute/azure-go-test/azstorage"
 )
 
@@ -71,6 +72,7 @@ func shutdown(signum os.Signal) {
 
 	go func() {
 		logrus.WithField("signal", signum).Info("Signal received, shutting down.")
+
 		timeout <- false
 	}()
 
@@ -97,6 +99,8 @@ func main() {
 
 	shutdownComplete = make(chan struct{})
 
+	ctx, cancelCtx := context.WithCancel(context.Background())
+
 	// Handle Ctrl+C
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
@@ -104,13 +108,14 @@ func main() {
 	go func() {
 		for signum := range c {
 			// Run the shutdown sequence in a goroutine, so that multiple Ctrl+C presses can be handled in parallel.
+			cancelCtx()
 			go shutdown(signum)
 		}
 	}()
 
 	config := azconfig.Load()
 	if cliArgs.showStartupCLI {
-		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
+		ctx, cancel := context.WithDeadline(ctx, time.Now().Add(1*time.Minute))
 		defer cancel()
 
 		poolParams := azbatch.PoolParameters()
@@ -120,8 +125,12 @@ func main() {
 		return
 	}
 
-	azbatch.CreatePool(config)
+	azresource.EnsureResourceGroup(ctx, &config)
+	azstorage.EnsureAccount(ctx, &config)
+	azbatch.EnsureAccount(ctx, &config)
+	// azbatch.CreatePool(config)
 
+	cancelCtx()
 	go shutdown(os.Interrupt)
 	logrus.Info("Waiting for shutdown to complete.")
 	<-shutdownComplete

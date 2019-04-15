@@ -10,10 +10,12 @@
   version = "v0.2.0"
 
 [[projects]]
-  digest = "1:6f0cb87283b8beb8b037f259c22049e60c127cae994fb0e9931a5f989376bcf1"
+  digest = "1:c2134bbdd745ee9a6760e76d96c8c45dcf801ae0c93ae39e222e2350d916523c"
   name = "github.com/Azure/azure-sdk-for-go"
   packages = [
     "services/batch/2018-12-01.8.0/batch",
+    "services/batch/mgmt/2017-09-01/batch",
+    "services/resources/mgmt/2017-05-10/resources",
     "services/storage/mgmt/2018-07-01/storage",
     "version",
   ]
@@ -271,11 +273,14 @@
   analyzer-version = 1
   input-imports = [
     "github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch",
+    "github.com/Azure/azure-sdk-for-go/services/batch/mgmt/2017-09-01/batch",
+    "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2017-05-10/resources",
     "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2018-07-01/storage",
     "github.com/Azure/go-autorest/autorest",
     "github.com/Azure/go-autorest/autorest/azure",
     "github.com/Azure/go-autorest/autorest/azure/auth",
     "github.com/Azure/go-autorest/autorest/date",
+    "github.com/Azure/go-autorest/autorest/to",
     "github.com/sirupsen/logrus",
   ]
   solver-name = "gps-cdcl"
