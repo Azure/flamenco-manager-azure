@@ -18,7 +18,8 @@ import (
 )
 
 const applicationName = "Azure Go Test"
-const applicationVersion = "1.0"
+
+var applicationVersion = "1.0"
 
 // Components that make up the application
 
