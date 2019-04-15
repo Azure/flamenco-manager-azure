@@ -28,14 +28,14 @@ var shutdownComplete chan struct{}
 
 var cliArgs struct {
 	version        bool
-	verbose        bool
+	quiet          bool
 	debug          bool
 	showStartupCLI bool
 }
 
 func parseCliArgs() {
 	flag.BoolVar(&cliArgs.version, "version", false, "Shows the application version, then exits.")
-	flag.BoolVar(&cliArgs.verbose, "verbose", false, "Enable info-level logging.")
+	flag.BoolVar(&cliArgs.quiet, "quiet", false, "Disable info-level logging (so warning/error only).")
 	flag.BoolVar(&cliArgs.debug, "debug", false, "Enable debug-level logging.")
 	flag.BoolVar(&cliArgs.showStartupCLI, "startupCLI", false, "Just show the startup task CLI, do not start the pool.")
 	flag.Parse()
@@ -47,11 +47,11 @@ func configLogging() {
 	})
 
 	// Only log the warning severity or above by default.
-	level := log.WarnLevel
+	level := log.InfoLevel
 	if cliArgs.debug {
 		level = log.DebugLevel
-	} else if cliArgs.verbose {
-		level = log.InfoLevel
+	} else if cliArgs.quiet {
+		level = log.WarnLevel
 	}
 	log.SetLevel(level)
 	stdlog.SetOutput(log.StandardLogger().Writer())
