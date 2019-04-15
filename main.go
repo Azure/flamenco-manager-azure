@@ -4,14 +4,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	stdlog "log"
-
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azbatch"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 	"gitlab.com/blender-institute/azure-go-test/azstorage"
@@ -42,27 +41,27 @@ func parseCliArgs() {
 }
 
 func configLogging() {
-	log.SetFormatter(&log.TextFormatter{
+	logrus.SetFormatter(&logrus.TextFormatter{
 		FullTimestamp: true,
 	})
 
 	// Only log the warning severity or above by default.
-	level := log.InfoLevel
+	level := logrus.InfoLevel
 	if cliArgs.debug {
-		level = log.DebugLevel
+		level = logrus.DebugLevel
 	} else if cliArgs.quiet {
-		level = log.WarnLevel
+		level = logrus.WarnLevel
 	}
-	log.SetLevel(level)
-	stdlog.SetOutput(log.StandardLogger().Writer())
+	logrus.SetLevel(level)
+	log.SetOutput(logrus.StandardLogger().Writer())
 }
 
 func logStartup() {
-	level := log.GetLevel()
-	defer log.SetLevel(level)
+	level := logrus.GetLevel()
+	defer logrus.SetLevel(level)
 
-	log.SetLevel(log.InfoLevel)
-	log.WithFields(log.Fields{
+	logrus.SetLevel(logrus.InfoLevel)
+	logrus.WithFields(logrus.Fields{
 		"version": applicationVersion,
 	}).Infof("Starting %s", applicationName)
 }
@@ -71,16 +70,16 @@ func shutdown(signum os.Signal) {
 	timeout := make(chan bool)
 
 	go func() {
-		log.WithField("signal", signum).Info("Signal received, shutting down.")
+		logrus.WithField("signal", signum).Info("Signal received, shutting down.")
 		timeout <- false
 	}()
 
 	select {
 	case <-timeout:
-		log.Warning("Shutdown complete, stopping process.")
+		logrus.Warning("Shutdown complete, stopping process.")
 		close(shutdownComplete)
 	case <-time.After(5 * time.Second):
-		log.Error("Shutdown forced, stopping process.")
+		logrus.Error("Shutdown forced, stopping process.")
 		os.Exit(-2)
 	}
 
@@ -117,13 +116,13 @@ func main() {
 		poolParams := azbatch.PoolParameters()
 		withCreds := azstorage.ReplaceAccountDetails(ctx, config, poolParams)
 		fmt.Println(*withCreds.StartTask.CommandLine)
-		log.Info("shutting down after logging account storage key stuff")
+		logrus.Info("shutting down after logging account storage key stuff")
 		return
 	}
 
 	azbatch.CreatePool(config)
 
 	go shutdown(os.Interrupt)
-	log.Info("Waiting for shutdown to complete.")
+	logrus.Info("Waiting for shutdown to complete.")
 	<-shutdownComplete
 }

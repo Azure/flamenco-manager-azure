@@ -16,7 +16,7 @@ import (
 	"github.com/Azure/go-autorest/autorest/date"
 	"gitlab.com/blender-institute/azure-go-test/azauth"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -41,7 +41,7 @@ func constructBatchURL(config azconfig.AZConfig) string {
 
 // PoolParameters loads batchParamFile and returns it parsed.
 func PoolParameters() batch.PoolAddParameter {
-	logger := log.WithField("filename", batchParamFile)
+	logger := logrus.WithField("filename", batchParamFile)
 	paramFile, err := os.Open(batchParamFile)
 	if err != nil {
 		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
@@ -61,28 +61,28 @@ func PoolParameters() batch.PoolAddParameter {
 }
 
 func createPoolIfNotExist(ctx context.Context, batchURL string, poolParams batch.PoolAddParameter) {
-	logger := log.WithField("pool_id", *poolParams.ID)
+	logger := logrus.WithField("pool_id", *poolParams.ID)
 
 	poolClient := batch.NewPoolClient(batchURL)
 	poolClient.Authorizer = azauth.Load(azure.PublicCloud.BatchManagementEndpoint)
 	// poolClient.RequestInspector = azdebug.LogRequest()
 	// poolClient.ResponseInspector = azdebug.LogResponse()
 
-	log.Debug("fetching pools")
+	logrus.Debug("fetching pools")
 	poolExists := false
 	resultPage, err := poolClient.List(ctx, "", "", "", nil, nil, nil, nil, nil)
 	if err != nil {
-		log.WithError(err).Fatal("unable to list existing pools")
+		logrus.WithError(err).Fatal("unable to list existing pools")
 	}
 
 	for resultPage.NotDone() {
 		for _, foundPool := range resultPage.Values() {
-			log.WithField("found_id", *foundPool.ID).Info("found existing Azure Batch pool")
+			logrus.WithField("found_id", *foundPool.ID).Info("found existing Azure Batch pool")
 			poolExists = poolExists || (*foundPool.ID == *poolParams.ID)
 		}
 		err := resultPage.NextWithContext(ctx)
 		if err != nil {
-			log.WithError(err).Fatal("unable to get next page of pools")
+			logrus.WithError(err).Fatal("unable to get next page of pools")
 		}
 	}
 	logger.WithField("pool_exists", poolExists).Debug("done listing pools")

@@ -7,10 +7,9 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
 	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2018-07-01/storage"
 	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azauth"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func client(config azconfig.AZConfig) storage.AccountsClient {
@@ -24,7 +23,7 @@ func ReplaceAccountDetails(ctx context.Context, config azconfig.AZConfig, poolPa
 	var startupCLI string
 
 	accountName := config.StorageAccountName
-	logger := log.WithFields(log.Fields{
+	logger := logrus.WithFields(logrus.Fields{
 		"storageAccount": accountName,
 		"resourceGroup":  config.ResourceGroup,
 	})
@@ -50,7 +49,7 @@ func ReplaceAccountDetails(ctx context.Context, config azconfig.AZConfig, poolPa
 	}
 
 	storageKey := (*result.Keys)[0]
-	logger.WithFields(log.Fields{
+	logger.WithFields(logrus.Fields{
 		"name":        *storageKey.KeyName,
 		"permissions": storageKey.Permissions,
 	}).Debug("found storage account key")

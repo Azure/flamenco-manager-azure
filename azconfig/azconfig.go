@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"os"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -27,7 +27,7 @@ type AZConfig struct {
 
 // Load returns the config file, or hard-exits the process if it cannot be loaded.
 func Load() AZConfig {
-	logger := log.WithField("filename", configFile)
+	logger := logrus.WithField("filename", configFile)
 	paramFile, err := os.Open(configFile)
 	if err != nil {
 		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
