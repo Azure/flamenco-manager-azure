@@ -1,6 +1,7 @@
 package azconfig
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -57,6 +58,16 @@ func Load() AZConfig {
 		logger.Fatal("property 'location' must be set")
 	}
 	return params
+}
+
+// StorageAccountID computes the storage account ID given the other properties.
+func (azc AZConfig) StorageAccountID() string {
+	return fmt.Sprintf(
+		"/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Storage/storageAccounts/%s",
+		azc.SubscriptionID,
+		azc.ResourceGroup,
+		azc.StorageAccountName,
+	)
 }
 
 // Save stores the config as YAML.
