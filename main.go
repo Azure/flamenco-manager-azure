@@ -110,7 +110,12 @@ func main() {
 	azbatch.EnsureAccount(ctx, &config)
 
 	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
-	azvm.EnsureVM(ctx, config, vmName, vmExists)
+	vm, publicIP := azvm.EnsureVM(ctx, config, vmName, vmExists)
+	address := *publicIP.IPAddress
+	logrus.WithFields(logrus.Fields{
+		"vmName":  *vm.Name,
+		"address": address,
+	}).Info("found VM public address")
 
 	// azbatch.CreatePool(config)
 
