@@ -114,12 +114,15 @@ func main() {
 	azresource.EnsureResourceGroup(ctx, &config, cliArgs.resourceGroup)
 
 	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
-	vm, publicIP := azvm.EnsureVM(ctx, config, vmName, vmExists)
-	address := *publicIP.IPAddress
+	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
+	address := *networkStack.PublicIP.IPAddress
 	logrus.WithFields(logrus.Fields{
 		"vmName":  *vm.Name,
 		"address": address,
-	}).Info("found VM public address")
+		"vnet":    *networkStack.VNet.Name,
+	}).Info("found network info")
+
+	// The storage account needs to be limited to the VM's VLAN.
 
 	azstorage.EnsureAccount(ctx, &config, cliArgs.storageAccount)
 	azbatch.EnsureAccount(ctx, &config, cliArgs.batchAccount)

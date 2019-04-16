@@ -2,6 +2,7 @@ package azvm
 
 import (
 	"context"
+	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2017-09-01/network"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -10,6 +11,13 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azauth"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 )
+
+// NetworkStack contains all the network info we need.
+type NetworkStack struct {
+	VNet      network.VirtualNetwork
+	PublicIP  network.PublicIPAddress
+	Interface network.Interface
+}
 
 func getNicClient(config azconfig.AZConfig) network.InterfacesClient {
 	nicClient := network.NewInterfacesClient(config.SubscriptionID)
@@ -36,11 +44,11 @@ func getSubnetsClient(config azconfig.AZConfig) network.SubnetsClient {
 }
 
 // CreateNetworkStack creates a virtual network, a public IP, and a NIC.
-func CreateNetworkStack(ctx context.Context, config azconfig.AZConfig, basename string) (network.PublicIPAddress, network.Interface) {
+func CreateNetworkStack(ctx context.Context, config azconfig.AZConfig, basename string) NetworkStack {
 	vnet := createVirtualNetwork(ctx, config, basename+"-vnet")
 	publicIP := createPublicIP(ctx, config, basename+"-ip")
 	nic := createNIC(ctx, config, vnet, publicIP, basename+"-nic")
-	return publicIP, nic
+	return NetworkStack{vnet, publicIP, nic}
 }
 
 func createVirtualNetwork(ctx context.Context, config azconfig.AZConfig, vnetName string) network.VirtualNetwork {
@@ -181,4 +189,96 @@ func createNIC(ctx context.Context, config azconfig.AZConfig,
 	}
 
 	return nic
+}
+
+// GetNetworkStack obtains virtual network components from a NIC.
+func GetNetworkStack(ctx context.Context, config azconfig.AZConfig, nicID string) NetworkStack {
+	nic := findNIC(ctx, config, nicID)
+	publicIP := findPublicIP(ctx, config, nic)
+	vnet := findVNet(ctx, config, nic)
+
+	return NetworkStack{vnet, publicIP, nic}
+}
+
+func findNIC(ctx context.Context, config azconfig.AZConfig, nicID string) network.Interface {
+	// From the NIC ID, get its name; somehow we only get the ID from the VM, but we can only get the nic by its name.
+	parts := strings.Split(nicID, "/")
+	nicName := parts[len(parts)-1]
+
+	nicClient := getNicClient(config)
+	nic, err := nicClient.Get(ctx, config.ResourceGroup, nicName, "")
+	if err != nil {
+		logrus.WithFields(logrus.Fields{
+			"nicID":         nicID,
+			logrus.ErrorKey: err,
+		}).Fatal("unable to get NIC")
+	}
+
+	return nic
+}
+
+func findPublicIP(ctx context.Context, config azconfig.AZConfig, nic network.Interface) network.PublicIPAddress {
+	logger := logrus.WithFields(logrus.Fields{
+		"resourceGroup": config.ResourceGroup,
+		"location":      config.Location,
+		"nicID":         *nic.ID,
+	})
+	logger.Debug("finding public IP address")
+
+	var publicIPID string
+	for _, ipConfig := range *nic.IPConfigurations {
+		if ipConfig.PublicIPAddress == nil {
+			continue
+		}
+
+		publicIPID = *ipConfig.PublicIPAddress.ID
+		break
+	}
+	if publicIPID == "" {
+		logger.Fatal("unable to find public IP address")
+	}
+
+	ipClient := getIPClient(config)
+	ipIDParts := strings.Split(publicIPID, "/")
+	ipName := ipIDParts[len(ipIDParts)-1]
+	publicIP, err := ipClient.Get(ctx, config.ResourceGroup, ipName, "")
+	if err != nil {
+		logger.WithFields(logrus.Fields{
+			"nicID":         *nic.ID,
+			"publicIPID":    publicIPID,
+			logrus.ErrorKey: err,
+		}).Fatal("unable to retrieve public IP")
+	}
+
+	return publicIP
+}
+
+func findVNet(ctx context.Context, config azconfig.AZConfig, nic network.Interface) network.VirtualNetwork {
+	logger := logrus.WithFields(logrus.Fields{
+		"resourceGroup": config.ResourceGroup,
+		"location":      config.Location,
+		"nicID":         *nic.ID,
+	})
+
+	if nic.IPConfigurations == nil || len(*nic.IPConfigurations) == 0 {
+		logger.Fatal("NIC has no IP configurations")
+	}
+
+	// Splitting the ID string without verifying it has the format we expect is a hack,
+	// but it's unclear how we can correctly obtain the name of the virtual network.
+	ipConfig := (*nic.IPConfigurations)[0]
+	logger = logger.WithField("subnet", *ipConfig.Subnet.ID)
+	logger.Debug("found subnet")
+
+	subnetParts := strings.Split(*ipConfig.Subnet.ID, "/")
+	vnetName := subnetParts[len(subnetParts)-3]
+	logger = logger.WithField("vnet", vnetName)
+
+	vnetClient := getVnetClient(config)
+	vnet, err := vnetClient.Get(ctx, config.ResourceGroup, vnetName, "")
+	if err != nil {
+		logger.WithError(err).Fatal("unable to get virtual network")
+	}
+
+	return vnet
 }
