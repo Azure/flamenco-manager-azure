@@ -15,6 +15,7 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 	"gitlab.com/blender-institute/azure-go-test/azresource"
 	"gitlab.com/blender-institute/azure-go-test/azstorage"
+	"gitlab.com/blender-institute/azure-go-test/azvm"
 )
 
 const applicationName = "Azure Go Test"
@@ -28,6 +29,8 @@ var cliArgs struct {
 	quiet          bool
 	debug          bool
 	showStartupCLI bool
+
+	vmName string
 }
 
 func parseCliArgs() {
@@ -35,6 +38,7 @@ func parseCliArgs() {
 	flag.BoolVar(&cliArgs.quiet, "quiet", false, "Disable info-level logging (so warning/error only).")
 	flag.BoolVar(&cliArgs.debug, "debug", false, "Enable debug-level logging.")
 	flag.BoolVar(&cliArgs.showStartupCLI, "startupCLI", false, "Just show the startup task CLI, do not start the pool.")
+	flag.StringVar(&cliArgs.vmName, "vm", "", "Name of the virtual machine to use. If not given, it will be prompted for.")
 	flag.Parse()
 }
 
@@ -104,6 +108,10 @@ func main() {
 	azresource.EnsureResourceGroup(ctx, &config)
 	azstorage.EnsureAccount(ctx, &config)
 	azbatch.EnsureAccount(ctx, &config)
+
+	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
+	azvm.EnsureVM(ctx, config, vmName, vmExists)
+
 	// azbatch.CreatePool(config)
 
 	cancelCtx()

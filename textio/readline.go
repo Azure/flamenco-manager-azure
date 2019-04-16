@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 )
 
@@ -29,6 +30,6 @@ func ReadLine(ctx context.Context, prompt string) string {
 		fmt.Println("aborted")
 		return ""
 	case text := <-textChan:
-		return text
+		return strings.TrimSpace(text)
 	}
 }

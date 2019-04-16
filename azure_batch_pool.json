@@ -1,10 +1,10 @@
 {
-    "id": "je-moeder-47",
+    "id": "crunchtime-F16s",
 
-    "vmSize": "Standard_D4_v3",
+    "vmSize": "Standard_F16s",
     "maxTasksPerNode": 1,
     "targetDedicatedNodes": 0,
-    "targetLowPriorityNodes": 1,
+    "targetLowPriorityNodes": 5,
 
     "virtualMachineConfiguration": {
         "imageReference": {
