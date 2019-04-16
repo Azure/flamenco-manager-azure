@@ -23,9 +23,6 @@ var applicationVersion = "1.0"
 
 // Components that make up the application
 
-// Signalling channels
-var shutdownComplete chan struct{}
-
 var cliArgs struct {
 	version        bool
 	quiet          bool
@@ -67,26 +64,6 @@ func logStartup() {
 	}).Infof("Starting %s", applicationName)
 }
 
-func shutdown(signum os.Signal) {
-	timeout := make(chan bool)
-
-	go func() {
-		logrus.WithField("signal", signum).Info("Signal received, shutting down.")
-
-		timeout <- false
-	}()
-
-	select {
-	case <-timeout:
-		logrus.Warning("Shutdown complete, stopping process.")
-		close(shutdownComplete)
-	case <-time.After(5 * time.Second):
-		logrus.Error("Shutdown forced, stopping process.")
-		os.Exit(-2)
-	}
-
-}
-
 func main() {
 	parseCliArgs()
 	if cliArgs.version {
@@ -97,8 +74,6 @@ func main() {
 	configLogging()
 	logStartup()
 
-	shutdownComplete = make(chan struct{})
-
 	ctx, cancelCtx := context.WithCancel(context.Background())
 
 	// Handle Ctrl+C
@@ -107,9 +82,10 @@ func main() {
 	signal.Notify(c, syscall.SIGTERM)
 	go func() {
 		for signum := range c {
-			// Run the shutdown sequence in a goroutine, so that multiple Ctrl+C presses can be handled in parallel.
+			logrus.WithField("signal", signum).Info("Signal received, shutting down.")
 			cancelCtx()
-			go shutdown(signum)
+			time.Sleep(1 * time.Second)
+			os.Exit(2)
 		}
 	}()
 
@@ -131,7 +107,4 @@ func main() {
 	// azbatch.CreatePool(config)
 
 	cancelCtx()
-	go shutdown(os.Interrupt)
-	logrus.Info("Waiting for shutdown to complete.")
-	<-shutdownComplete
 }
