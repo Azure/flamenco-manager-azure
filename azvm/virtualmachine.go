@@ -13,6 +13,7 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azauth"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 	"gitlab.com/blender-institute/azure-go-test/azdebug"
+	"gitlab.com/blender-institute/azure-go-test/aznetwork"
 	"gitlab.com/blender-institute/azure-go-test/textio"
 )
 
@@ -90,7 +91,7 @@ func ChooseVM(ctx context.Context, config azconfig.AZConfig, vmName string) (cho
 }
 
 // EnsureVM either returns the VM info (isExisting=true) or creates a new VM (isExisting=false)
-func EnsureVM(ctx context.Context, config azconfig.AZConfig, vmName string, isExisting bool) (compute.VirtualMachine, NetworkStack) {
+func EnsureVM(ctx context.Context, config azconfig.AZConfig, vmName string, isExisting bool) (compute.VirtualMachine, aznetwork.NetworkStack) {
 	vmClient := getVMClient(config)
 
 	logger := logrus.WithFields(logrus.Fields{
@@ -125,7 +126,7 @@ func loadSSHKey() string {
 	return string(sshBytes)
 }
 
-func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (compute.VirtualMachine, NetworkStack) {
+func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (compute.VirtualMachine, aznetwork.NetworkStack) {
 	sshKeyData := loadSSHKey()
 	adminPassword := RandStringBytes(32)
 
@@ -135,7 +136,7 @@ func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (com
 		"vmName":        vmName,
 	})
 
-	netstack := CreateNetworkStack(ctx, config, vmName)
+	netstack := aznetwork.CreateNetworkStack(ctx, config, vmName)
 
 	logger.Info("creating virtual machine")
 	vmClient := getVMClient(config)
@@ -198,11 +199,11 @@ func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (com
 	return vm, netstack
 }
 
-func findVMNetworkStack(ctx context.Context, config azconfig.AZConfig, vm compute.VirtualMachine) NetworkStack {
+func findVMNetworkStack(ctx context.Context, config azconfig.AZConfig, vm compute.VirtualMachine) aznetwork.NetworkStack {
 	if vm.NetworkProfile == nil || vm.NetworkProfile.NetworkInterfaces == nil || len(*vm.NetworkProfile.NetworkInterfaces) == 0 {
 		logrus.Fatal("this VM has no network interface")
 	}
 
 	nicRef := (*vm.NetworkProfile.NetworkInterfaces)[0]
-	return GetNetworkStack(ctx, config, *nicRef.ID)
+	return aznetwork.GetNetworkStack(ctx, config, *nicRef.ID)
 }

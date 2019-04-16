@@ -1,4 +1,4 @@
-package azvm
+package aznetwork
 
 import (
 	"context"
