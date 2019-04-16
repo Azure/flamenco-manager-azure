@@ -14,15 +14,18 @@ import (
 
 // EnsureResourceGroup creates a resource group if config.ResourceGroup is "".
 // The program is aborted when creation is required but fails.
-func EnsureResourceGroup(ctx context.Context, config *azconfig.AZConfig) {
-	if config.ResourceGroup != "" {
+func EnsureResourceGroup(ctx context.Context, config *azconfig.AZConfig, groupName string) {
+	if groupName != "" {
+		config.ResourceGroup = groupName
+		logrus.WithField("resourceGroup", config.ResourceGroup).Debug("creating resource group from CLI")
+	} else if config.ResourceGroup != "" {
 		logrus.WithField("resourceGroup", config.ResourceGroup).Info("resource group known, not creating new one")
 		return
-	}
-
-	config.ResourceGroup = textio.ReadLine(ctx, "Desired resource group name")
-	if config.ResourceGroup == "" {
-		logrus.Fatal("no resource group name given, aborting")
+	} else {
+		config.ResourceGroup = textio.ReadLine(ctx, "Desired resource group name")
+		if config.ResourceGroup == "" {
+			logrus.Fatal("no resource group name given, aborting")
+		}
 	}
 
 	group, ok := createResourceGroup(ctx, *config)

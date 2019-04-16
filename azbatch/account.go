@@ -14,15 +14,18 @@ import (
 
 // EnsureAccount creates a batch account if config.BatchAccountName is "".
 // The program is aborted when creation is required but fails.
-func EnsureAccount(ctx context.Context, config *azconfig.AZConfig) {
-	if config.BatchAccountName != "" {
+func EnsureAccount(ctx context.Context, config *azconfig.AZConfig, accountName string) {
+	if accountName != "" {
+		config.BatchAccountName = accountName
+		logrus.WithField("batchAccountName", config.BatchAccountName).Debug("creating batch account from CLI")
+	} else if config.BatchAccountName != "" {
 		logrus.WithField("batchAccountName", config.BatchAccountName).Info("batch account known, not creating new one")
 		return
-	}
-
-	config.BatchAccountName = textio.ReadLine(ctx, "Desired batch account name")
-	if config.BatchAccountName == "" {
-		logrus.Fatal("no batch account name given, aborting")
+	} else {
+		config.BatchAccountName = textio.ReadLine(ctx, "Desired batch account name")
+		if config.BatchAccountName == "" {
+			logrus.Fatal("no batch account name given, aborting")
+		}
 	}
 
 	account, ok := CreateAccount(ctx, *config)

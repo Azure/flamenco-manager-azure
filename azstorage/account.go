@@ -14,15 +14,18 @@ import (
 
 // EnsureAccount creates a storage account if config.StorageAccountName is "".
 // The program is aborted when creation is required but fails.
-func EnsureAccount(ctx context.Context, config *azconfig.AZConfig) {
-	if config.StorageAccountName != "" {
+func EnsureAccount(ctx context.Context, config *azconfig.AZConfig, accountName string) {
+	if accountName != "" {
+		config.StorageAccountName = accountName
+		logrus.WithField("storageAccountName", config.StorageAccountName).Debug("creating storage account from CLI")
+	} else if config.StorageAccountName != "" {
 		logrus.WithField("storageAccountName", config.StorageAccountName).Info("storage account known, not creating new one")
 		return
-	}
-
-	config.StorageAccountName = textio.ReadLine(ctx, "Desired storage account name")
-	if config.StorageAccountName == "" {
-		logrus.Fatal("no storage account name given, aborting")
+	} else {
+		config.StorageAccountName = textio.ReadLine(ctx, "Desired storage account name")
+		if config.StorageAccountName == "" {
+			logrus.Fatal("no storage account name given, aborting")
+		}
 	}
 
 	account, ok := CreateAccount(ctx, *config)
