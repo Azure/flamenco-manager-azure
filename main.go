@@ -14,8 +14,8 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azbatch"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 	"gitlab.com/blender-institute/azure-go-test/azresource"
+	"gitlab.com/blender-institute/azure-go-test/azssh"
 	"gitlab.com/blender-institute/azure-go-test/azstorage"
-	"gitlab.com/blender-institute/azure-go-test/azvm"
 )
 
 const applicationName = "Azure Go Test"
@@ -111,6 +111,8 @@ func main() {
 		return
 	}
 
+	sshContext := azssh.LoadSSHContext()
+
 	// Determine what to create and what to assume is there.
 	// sa = Storage Account; ba = Batch Account
 	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup)
@@ -119,19 +121,20 @@ func main() {
 		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
 	}
 	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount)
-	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
+	// vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
 
 	// Create & update stuff.
 	if createRG {
 		azresource.EnsureResourceGroup(ctx, &config, rgName)
 	}
-	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
-	address := *networkStack.PublicIP.IPAddress
-	logrus.WithFields(logrus.Fields{
-		"vmName":  *vm.Name,
-		"address": address,
-		"vnet":    *networkStack.VNet.Name,
-	}).Info("found network info")
+	// vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
+	// address := *networkStack.PublicIP.IPAddress
+	// logrus.WithFields(logrus.Fields{
+	// 	"vmName":  *vm.Name,
+	// 	"address": address,
+	// 	"vnet":    *networkStack.VNet.Name,
+	// }).Info("found network info")
+	address := "52.232.83.58"
 	if createSA {
 		azstorage.CreateAndSave(ctx, &config, saName)
 	}
@@ -139,7 +142,13 @@ func main() {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}
 
-	azstorage.EnsureFileShares(ctx, config)
+	// _ = azstorage.EnsureFileShares(ctx, config)
+
+	// Set up the VM via an SSH connection
+	ssh := azssh.Connect(sshContext, address)
+	defer ssh.Close()
+	ssh.SetupUsers()
+	ssh.RunInstallScript()
 
 	// azbatch.CreatePool(config)
 

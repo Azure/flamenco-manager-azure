@@ -9,6 +9,7 @@ import (
 	"github.com/Azure/azure-storage-file-go/azfile"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
+	"gitlab.com/blender-institute/azure-go-test/flamenco"
 )
 
 const (
@@ -17,18 +18,38 @@ const (
 	statusShareAlreadyExists = "ShareAlreadyExists"
 )
 
-// EnsureFileShares sets up the required SMB shares.
-func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) {
+var (
+	defaultSMBShares = []string{
+		"flamenco-resources",
+		"flamenco-input",
+		"flamenco-output",
+	}
+)
+
+// EnsureFileShares sets up the SMB shares. Returns fstab lines to mount them.
+func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
 	storageCreds := GetCredentials(ctx, config)
 	logrus.WithFields(logrus.Fields{
 		"username": storageCreds.Username,
 		"password": storageCreds.Password,
 	}).Info("obtained storage credentials")
 
+	fstab := []string{}
 	shareURL := getShareURL(config, storageCreds)
-	createFileShare(ctx, shareURL, "flamenco-resources")
-	createFileShare(ctx, shareURL, "flamenco-input")
-	createFileShare(ctx, shareURL, "flamenco-output")
+	for _, shareName := range defaultSMBShares {
+		createFileShare(ctx, shareURL, shareName)
+
+		fstabLine := fmt.Sprintf(
+			"//%s.file.core.windows.net/%s /mnt/%s cifs vers=3.0,username=%s,password=%s,dir_mode=0770,file_mode=0660,gid=%s,forcegid,sec=ntlmssp,mfsymlinks 0 0",
+			config.StorageAccountName,
+			shareName, shareName,
+			storageCreds.Username, storageCreds.Password,
+			flamenco.UnixGroupName,
+		)
+
+		fstab = append(fstab, fstabLine)
+	}
+	return strings.Join(fstab, "\n")
 }
 
 func getShareURL(config azconfig.AZConfig, storageCreds Credentials) azfile.ServiceURL {
