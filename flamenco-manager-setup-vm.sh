@@ -9,6 +9,21 @@ FFMPEG_VERSION="4.1.3"
 
 WORKER_COMPONENTS_DIR="/mnt/flamenco-resources/apps"
 
+## Install system packages
+sudo -s <<EOT
+apt-get install -qy software-properties-common
+apt-key adv --recv 9DA31620334BD75D9DCB49F368818C72E52529D4
+cat > /etc/apt/sources.list.d/mongodb-org-4.0.list <<END
+deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu bionic/mongodb-org/4.0 multiverse
+END
+apt-get update -q
+DEBIAN_FRONTEND=noninteractive apt-get install -qy \
+    -o APT::Install-Recommends=false -o APT::Install-Suggests=false \
+    imagemagick mongodb-org-server
+systemctl enable mongod.service
+EOT
+
+echo
 echo "Setting up /etc/fstab"
 # Remove any old reference to the SMB shares
 grep -v 'file.core.windows.net' < /etc/fstab > stripped-fstab
