@@ -5,6 +5,9 @@ package flamenco
 // between packages, they should go here.
 const (
 	AdminUsername = "flamencoadmin"
+
+	// When changing this, be sure to also change the installation script.
+	// See flamenco-manager-setup-vm.sh.
 	UnixGroupName = "flamenco"
 
 	// The VM installation script; it is named locally the same as remotely.

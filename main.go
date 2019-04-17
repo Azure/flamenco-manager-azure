@@ -142,13 +142,18 @@ func main() {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}
 
-	// _ = azstorage.EnsureFileShares(ctx, config)
+	fstab := azstorage.EnsureFileShares(ctx, config)
 
 	// Set up the VM via an SSH connection
 	ssh := azssh.Connect(sshContext, address)
-	defer ssh.Close()
 	ssh.SetupUsers()
+	ssh.Close()
+
+	// Reconnect to ensure the admin user is part of the flamenco group.
+	ssh = azssh.Connect(sshContext, address)
+	ssh.UploadAsFile([]byte(fstab), "fstab-smb")
 	ssh.RunInstallScript()
+	ssh.Close()
 
 	// azbatch.CreatePool(config)
 

@@ -49,7 +49,7 @@ func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
 
 		fstab = append(fstab, fstabLine)
 	}
-	return strings.Join(fstab, "\n")
+	return strings.Join(fstab, "\n") + "\n"
 }
 
 func getShareURL(config azconfig.AZConfig, storageCreds Credentials) azfile.ServiceURL {

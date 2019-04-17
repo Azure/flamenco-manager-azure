@@ -2,11 +2,9 @@ package azssh
 
 import (
 	"fmt"
-	"io/ioutil"
 	"strings"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/flamenco"
 
 	"golang.org/x/crypto/ssh"
 )
@@ -68,50 +66,4 @@ func (c *Connection) run(cmd string, args ...interface{}) string {
 	}
 
 	return stringOut
-}
-
-// SetupUsers sets up the users and groups on Flamenco Manager.
-func (c *Connection) SetupUsers() {
-	c.logger.Info("setting up users")
-	c.run("sudo groupadd --force %s", flamenco.UnixGroupName)
-	c.run("sudo usermod %s --append --groups %s", flamenco.AdminUsername, flamenco.UnixGroupName)
-}
-
-// RunInstallScript sends the install script to the VM and runs it there.
-func (c *Connection) RunInstallScript() {
-	session, err := c.client.NewSession()
-	if err != nil {
-		c.logger.WithError(err).Fatal("error creating SSH session")
-	}
-	defer session.Close()
-
-	logger := c.logger.WithField("scriptName", flamenco.InstallScriptName)
-	toSend, err := ioutil.ReadFile(flamenco.InstallScriptName)
-	if err != nil {
-		logger.WithError(err).Fatal("unable to read install script")
-	}
-
-	logger.Info("sending installation script")
-
-	pipe, err := session.StdinPipe()
-	if err != nil {
-		logger.WithError(err).Fatal("unable to create pipe")
-	}
-	go func() {
-		pipe.Write(toSend)
-		pipe.Close()
-	}()
-
-	combinedOut, err := session.CombinedOutput("cat > " + flamenco.InstallScriptName)
-	stringOut := strings.TrimSpace(string(combinedOut))
-	if err != nil {
-		logger.WithFields(logrus.Fields{
-			"output":        stringOut,
-			logrus.ErrorKey: err,
-		}).Fatal("error running command")
-	}
-
-	c.run("chmod +x %s", flamenco.InstallScriptName)
-	result := c.run("bash %s", flamenco.InstallScriptName)
-	logger.WithField("output", result).Info("installation script completed")
 }
