@@ -16,6 +16,7 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azresource"
 	"gitlab.com/blender-institute/azure-go-test/azssh"
 	"gitlab.com/blender-institute/azure-go-test/azstorage"
+	"gitlab.com/blender-institute/azure-go-test/azvm"
 )
 
 const applicationName = "Azure Go Test"
@@ -121,20 +122,19 @@ func main() {
 		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
 	}
 	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount)
-	// vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
+	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
 
 	// Create & update stuff.
 	if createRG {
 		azresource.EnsureResourceGroup(ctx, &config, rgName)
 	}
-	// vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
-	// address := *networkStack.PublicIP.IPAddress
-	// logrus.WithFields(logrus.Fields{
-	// 	"vmName":  *vm.Name,
-	// 	"address": address,
-	// 	"vnet":    *networkStack.VNet.Name,
-	// }).Info("found network info")
-	address := "52.232.83.58"
+	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
+	address := *networkStack.PublicIP.IPAddress
+	logrus.WithFields(logrus.Fields{
+		"vmName":  *vm.Name,
+		"address": address,
+		"vnet":    *networkStack.VNet.Name,
+	}).Info("found network info")
 	if createSA {
 		azstorage.CreateAndSave(ctx, &config, saName)
 	}
