@@ -72,6 +72,9 @@ func createVirtualNetwork(ctx context.Context, config azconfig.AZConfig, vnetNam
 					Name: to.StringPtr("default"),
 					SubnetPropertiesFormat: &network.SubnetPropertiesFormat{
 						AddressPrefix: to.StringPtr("10.0.0.0/16"),
+						ServiceEndpoints: &[]network.ServiceEndpointPropertiesFormat{{
+							Service: to.StringPtr("Microsoft.Storage"),
+						}},
 					},
 				}},
 				AddressSpace: &network.AddressSpace{

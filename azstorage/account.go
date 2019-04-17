@@ -9,7 +9,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azauth"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
-	"gitlab.com/blender-institute/azure-go-test/aznetwork"
 	"gitlab.com/blender-institute/azure-go-test/textio"
 )
 
@@ -42,8 +41,8 @@ func AskAccountName(ctx context.Context, config azconfig.AZConfig, cliAccountNam
 }
 
 // CreateAndSave creates a storage account and stores it in the config.
-func CreateAndSave(ctx context.Context, config *azconfig.AZConfig, accountName string, netStack aznetwork.NetworkStack) {
-	account, ok := CreateAccount(ctx, *config, netStack, accountName)
+func CreateAndSave(ctx context.Context, config *azconfig.AZConfig, accountName string) {
+	account, ok := CreateAccount(ctx, *config, accountName)
 	if !ok {
 		logrus.Fatal("unable to create storage account")
 	}
@@ -87,9 +86,7 @@ func CheckAvailability(ctx context.Context, config azconfig.AZConfig, accountNam
 }
 
 // CreateAccount creates a new azure storage account
-func CreateAccount(ctx context.Context, config azconfig.AZConfig,
-	netStack aznetwork.NetworkStack, accountName string,
-) (storage.Account, bool) {
+func CreateAccount(ctx context.Context, config azconfig.AZConfig, accountName string) (storage.Account, bool) {
 	accountClient := getAccountClient(config)
 
 	logger := logrus.WithFields(logrus.Fields{

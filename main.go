@@ -120,10 +120,11 @@ func main() {
 	}
 	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount)
 	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
+
+	// Create & update stuff.
 	if createRG {
 		azresource.EnsureResourceGroup(ctx, &config, rgName)
 	}
-
 	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
 	address := *networkStack.PublicIP.IPAddress
 	logrus.WithFields(logrus.Fields{
@@ -131,10 +132,8 @@ func main() {
 		"address": address,
 		"vnet":    *networkStack.VNet.Name,
 	}).Info("found network info")
-
-	// The storage account needs to be limited to the VM's VLAN.
 	if createSA {
-		azstorage.CreateAndSave(ctx, &config, saName, networkStack)
+		azstorage.CreateAndSave(ctx, &config, saName)
 	}
 	if createBA {
 		azbatch.CreateAndSave(ctx, &config, baName)
