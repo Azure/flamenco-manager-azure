@@ -12,22 +12,30 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/textio"
 )
 
-// EnsureResourceGroup creates a resource group if config.ResourceGroup is "".
-// The program is aborted when creation is required but fails.
-func EnsureResourceGroup(ctx context.Context, config *azconfig.AZConfig, groupName string) {
-	if groupName != "" {
-		config.ResourceGroup = groupName
-		logrus.WithField("resourceGroup", config.ResourceGroup).Debug("creating resource group from CLI")
-	} else if config.ResourceGroup != "" {
-		logrus.WithField("resourceGroup", config.ResourceGroup).Info("resource group known, not creating new one")
-		return
-	} else {
-		config.ResourceGroup = textio.ReadLine(ctx, "Desired resource group name")
-		if config.ResourceGroup == "" {
-			logrus.Fatal("no resource group name given, aborting")
-		}
+// AskResourceGroupName asks for a resource group, potentially overridable by a CLI arg.
+func AskResourceGroupName(ctx context.Context, config azconfig.AZConfig, cliAccountName string) (desiredName string, mustCreate bool) {
+	if cliAccountName != "" {
+		logrus.WithField("resourceGroup", cliAccountName).Debug("creating resource group from CLI")
+		return cliAccountName, true
 	}
 
+	if config.ResourceGroup != "" {
+		logrus.WithField("resourceGroup", config.ResourceGroup).Info("resource group known, not creating new one")
+		return config.ResourceGroup, false
+	}
+
+	desiredName = textio.ReadLine(ctx, "Desired resource group")
+	if desiredName == "" {
+		logrus.Fatal("no resource group given, aborting")
+	}
+
+	return desiredName, true
+}
+
+// EnsureResourceGroup creates a resource group and saves it to the config.
+// The program is aborted when creation is required but fails.
+func EnsureResourceGroup(ctx context.Context, config *azconfig.AZConfig, groupName string) {
+	config.ResourceGroup = groupName
 	group, ok := createResourceGroup(ctx, *config)
 	if !ok {
 		logrus.Fatal("unable to create resource group")

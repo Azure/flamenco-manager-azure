@@ -111,9 +111,19 @@ func main() {
 		return
 	}
 
-	azresource.EnsureResourceGroup(ctx, &config, cliArgs.resourceGroup)
-
+	// Determine what to create and what to assume is there.
+	// sa = Storage Account; ba = Batch Account
+	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup)
+	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount)
+	if createSA && !azstorage.CheckAvailability(ctx, config, saName) {
+		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
+	}
+	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount)
 	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
+	if createRG {
+		azresource.EnsureResourceGroup(ctx, &config, rgName)
+	}
+
 	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
 	address := *networkStack.PublicIP.IPAddress
 	logrus.WithFields(logrus.Fields{
@@ -123,9 +133,12 @@ func main() {
 	}).Info("found network info")
 
 	// The storage account needs to be limited to the VM's VLAN.
-
-	azstorage.EnsureAccount(ctx, &config, cliArgs.storageAccount)
-	azbatch.EnsureAccount(ctx, &config, cliArgs.batchAccount)
+	if createSA {
+		azstorage.CreateAndSave(ctx, &config, saName, networkStack)
+	}
+	if createBA {
+		azbatch.CreateAndSave(ctx, &config, baName)
+	}
 
 	// azbatch.CreatePool(config)
 
