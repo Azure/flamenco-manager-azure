@@ -10,6 +10,14 @@
   version = "v0.4.12"
 
 [[projects]]
+  digest = "1:279540310125d2b219920588d7e2edb2a85b3317b528839166e896ce6b6f211c"
+  name = "github.com/Azure/azure-pipeline-go"
+  packages = ["pipeline"]
+  pruneopts = "UT"
+  revision = "55fedc85a614dcd0e942a66f302ae3efb83d563c"
+  version = "v0.1.9"
+
+[[projects]]
   digest = "1:b54a05b2f500aaddac78015f87b483ee1b41cfcf2fc8c87e61018cbed28f31aa"
   name = "github.com/Azure/azure-sdk-for-go"
   packages = [
@@ -24,6 +32,14 @@
   pruneopts = "UT"
   revision = "5a6ac4ede9746cf350374156f521aa2e8499b5a9"
   version = "v27.1.0"
+
+[[projects]]
+  digest = "1:0376b54cf965bdae03b9c2a2734cad87fc3bbaa4066c0374ec86f10f77f03d45"
+  name = "github.com/Azure/azure-storage-file-go"
+  packages = ["azfile"]
+  pruneopts = "UT"
+  revision = "d93e19c84c2af7958331fb3ec8fd04eb0d76a25e"
+  version = "0.4.1"
 
 [[projects]]
   digest = "1:bc155c072617e886950589bddf3d53ad2092f917046b728c953eb6ba8a4479a7"
@@ -177,11 +193,19 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:994c4915a59f821705d08ea77b117ec7a3e6a46cc867fd194d887500dac1c3c2"
+  digest = "1:5ae58b801295e6c48d0a5f995ca70a84c808c96e9740865772e11e1dfd49aadd"
   name = "golang.org/x/crypto"
   packages = [
+    "curve25519",
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "internal/chacha20",
+    "internal/subtle",
     "pkcs12",
     "pkcs12/internal/rc2",
+    "poly1305",
+    "ssh",
+    "ssh/agent",
   ]
   pruneopts = "UT"
   revision = "88737f569e3a9c7ab309cdc09a07fe7fc87233c3"
@@ -212,9 +236,13 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:3e01c69b34e7c3fa4b7a118ca95a6beaecea00f7f4fb701545d83eacd3badb3c"
+  digest = "1:dd68f2bed31a27f4e2aff98c48d185b9e19d29d0b81fb0f81f58ec50469c2e4b"
   name = "golang.org/x/sys"
-  packages = ["unix"]
+  packages = [
+    "cpu",
+    "unix",
+    "windows",
+  ]
   pruneopts = "UT"
   revision = "3fd5a3612ccd7907f26270fa92579a0f2f76f734"
 
@@ -320,12 +348,15 @@
     "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2017-09-01/network",
     "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2017-05-10/resources",
     "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2018-07-01/storage",
+    "github.com/Azure/azure-storage-file-go/azfile",
     "github.com/Azure/go-autorest/autorest",
     "github.com/Azure/go-autorest/autorest/azure",
     "github.com/Azure/go-autorest/autorest/azure/auth",
     "github.com/Azure/go-autorest/autorest/date",
     "github.com/Azure/go-autorest/autorest/to",
     "github.com/sirupsen/logrus",
+    "golang.org/x/crypto/ssh",
+    "golang.org/x/crypto/ssh/agent",
     "gopkg.in/yaml.v2",
   ]
   solver-name = "gps-cdcl"

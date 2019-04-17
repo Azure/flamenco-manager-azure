@@ -30,6 +30,10 @@
   version = "27.1.0"
 
 [[constraint]]
+  version = "0.4.1"
+  name = "github.com/Azure/azure-storage-file-go"
+
+[[constraint]]
   name = "github.com/Azure/go-autorest"
   version = "11.7.1"
 
