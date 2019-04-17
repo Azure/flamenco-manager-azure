@@ -139,6 +139,12 @@ func main() {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}
 
+	storageCreds := azstorage.GetCredentials(ctx, config)
+	logrus.WithFields(logrus.Fields{
+		"username": storageCreds.Username,
+		"password": storageCreds.Password,
+	}).Info("obtained storage credentials")
+
 	// azbatch.CreatePool(config)
 
 	cancelCtx()
