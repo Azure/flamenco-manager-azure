@@ -129,13 +129,15 @@ func main() {
 		azresource.EnsureResourceGroup(ctx, &config, rgName)
 	}
 	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
-	address := *networkStack.PublicIP.IPAddress
+	publicIP := *networkStack.PublicIP.IPAddress
 	logrus.WithFields(logrus.Fields{
-		"vmName":  *vm.Name,
-		"address": address,
-		"vnet":    *networkStack.VNet.Name,
+		"vmName":         *vm.Name,
+		"publicAddress":  publicIP,
+		"privateAddress": networkStack.PrivateIP,
+		"vnet":           *networkStack.VNet.Name,
 	}).Info("found network info")
 	azvm.WaitForReady(ctx, config, vmName)
+
 	if createSA {
 		azstorage.CreateAndSave(ctx, &config, saName)
 	}
@@ -146,12 +148,12 @@ func main() {
 	fstab := azstorage.EnsureFileShares(ctx, config)
 
 	// Set up the VM via an SSH connection
-	ssh := azssh.Connect(sshContext, address)
+	ssh := azssh.Connect(sshContext, publicIP)
 	ssh.SetupUsers()
 	ssh.Close()
 
 	// Reconnect to ensure the admin user is part of the flamenco group.
-	ssh = azssh.Connect(sshContext, address)
+	ssh = azssh.Connect(sshContext, publicIP)
 	ssh.UploadAsFile([]byte(fstab), "fstab-smb")
 	ssh.RunInstallScript()
 	ssh.Close()

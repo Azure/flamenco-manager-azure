@@ -16,6 +16,7 @@ import (
 type NetworkStack struct {
 	VNet      network.VirtualNetwork
 	PublicIP  network.PublicIPAddress
+	PrivateIP string
 	Interface network.Interface
 }
 
@@ -48,7 +49,8 @@ func CreateNetworkStack(ctx context.Context, config azconfig.AZConfig, basename 
 	vnet := createVirtualNetwork(ctx, config, basename+"-vnet")
 	publicIP := createPublicIP(ctx, config, basename+"-ip")
 	nic := createNIC(ctx, config, vnet, publicIP, basename+"-nic")
-	return NetworkStack{vnet, publicIP, nic}
+	privateIP := findPrivateIP(config, nic)
+	return NetworkStack{vnet, publicIP, privateIP, nic}
 }
 
 func createVirtualNetwork(ctx context.Context, config azconfig.AZConfig, vnetName string) network.VirtualNetwork {
@@ -198,9 +200,10 @@ func createNIC(ctx context.Context, config azconfig.AZConfig,
 func GetNetworkStack(ctx context.Context, config azconfig.AZConfig, nicID string) NetworkStack {
 	nic := findNIC(ctx, config, nicID)
 	publicIP := findPublicIP(ctx, config, nic)
+	privateIP := findPrivateIP(config, nic)
 	vnet := findVNet(ctx, config, nic)
 
-	return NetworkStack{vnet, publicIP, nic}
+	return NetworkStack{vnet, publicIP, privateIP, nic}
 }
 
 func findNIC(ctx context.Context, config azconfig.AZConfig, nicID string) network.Interface {
@@ -218,6 +221,23 @@ func findNIC(ctx context.Context, config azconfig.AZConfig, nicID string) networ
 	}
 
 	return nic
+}
+
+func findPrivateIP(config azconfig.AZConfig, nic network.Interface) string {
+	for _, ipConfig := range *nic.IPConfigurations {
+		if ipConfig.PrivateIPAddress == nil || *ipConfig.PrivateIPAddress == "" {
+			continue
+		}
+
+		return *ipConfig.PrivateIPAddress
+	}
+
+	logrus.WithFields(logrus.Fields{
+		"resourceGroup": config.ResourceGroup,
+		"location":      config.Location,
+		"nicID":         *nic.ID,
+	}).Fatal("this NIC has no private IP address")
+	return ""
 }
 
 func findPublicIP(ctx context.Context, config azconfig.AZConfig, nic network.Interface) network.PublicIPAddress {
