@@ -29,10 +29,6 @@ var (
 // EnsureFileShares sets up the SMB shares. Returns fstab lines to mount them.
 func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
 	storageCreds := GetCredentials(ctx, config)
-	logrus.WithFields(logrus.Fields{
-		"username": storageCreds.Username,
-		"password": storageCreds.Password,
-	}).Info("obtained storage credentials")
 
 	fstab := []string{}
 	shareURL := getShareURL(config, storageCreds)
