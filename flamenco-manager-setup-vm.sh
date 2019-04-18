@@ -4,8 +4,12 @@ set -e
 
 FMANAGER_VERSION="2.4.2-4-g530f260"
 FWORKER_VERSION="2.3"
-BLENDER_VERSION="2.80-5ac7675f4c9c"
 FFMPEG_VERSION="4.1.3"
+
+# TODO: Has to be updated every day, or we should provide a more stable version to download.
+# 'Stable' in the sense that it should keep existing on the server (daily builds are regularly
+# removed).
+BLENDER_VERSION="2.80-e5c5b990c6d3"
 
 WORKER_COMPONENTS_DIR="/mnt/flamenco-resources/apps"
 
