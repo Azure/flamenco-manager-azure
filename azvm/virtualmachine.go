@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-06-01/compute"
 	"github.com/Azure/go-autorest/autorest/azure"
@@ -206,4 +207,39 @@ func findVMNetworkStack(ctx context.Context, config azconfig.AZConfig, vm comput
 
 	nicRef := (*vm.NetworkProfile.NetworkInterfaces)[0]
 	return aznetwork.GetNetworkStack(ctx, config, *nicRef.ID)
+}
+
+// WaitForReady regularly polls a VM until it has the required status.
+func WaitForReady(ctx context.Context, config azconfig.AZConfig, vmName string) {
+	logger := logrus.WithFields(logrus.Fields{
+		"resourceGroup": config.ResourceGroup,
+		"location":      config.Location,
+		"vmName":        vmName,
+	})
+	vmClient := getVMClient(config)
+
+	for {
+		logger.Info("checking VM status")
+		vmInfo, err := vmClient.InstanceView(ctx, config.ResourceGroup, vmName)
+		if err != nil {
+			logger.WithError(err).Fatal("error fetching VM")
+		}
+
+		statuses := map[string]bool{}
+		for _, status := range *vmInfo.Statuses {
+			statuses[*status.Code] = true
+		}
+
+		if statuses["ProvisioningState/succeeded"] && statuses["PowerState/running"] {
+			logger.WithField("statuses", statuses).Info("VM is ready")
+			return
+		}
+
+		select {
+		case <-ctx.Done():
+			logger.Error("aborted")
+			return
+		case <-time.After(1 * time.Second):
+		}
+	}
 }

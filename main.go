@@ -135,6 +135,7 @@ func main() {
 		"address": address,
 		"vnet":    *networkStack.VNet.Name,
 	}).Info("found network info")
+	azvm.WaitForReady(ctx, config, vmName)
 	if createSA {
 		azstorage.CreateAndSave(ctx, &config, saName)
 	}
