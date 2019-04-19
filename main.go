@@ -118,6 +118,10 @@ func main() {
 	// Determine what to create and what to assume is there.
 	// sa = Storage Account; ba = Batch Account
 	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup)
+	if createRG {
+		azresource.EnsureResourceGroup(ctx, &config, rgName)
+	}
+
 	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount)
 	if createSA && !azstorage.CheckAvailability(ctx, config, saName) {
 		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
@@ -126,9 +130,6 @@ func main() {
 	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName)
 
 	// Create & update stuff.
-	if createRG {
-		azresource.EnsureResourceGroup(ctx, &config, rgName)
-	}
 	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
 	publicIP := *networkStack.PublicIP.IPAddress
 	logrus.WithFields(logrus.Fields{
