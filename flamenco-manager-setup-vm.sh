@@ -13,6 +13,33 @@ BLENDER_VERSION="2.80-e5c5b990c6d3"
 
 WORKER_COMPONENTS_DIR="/mnt/flamenco-resources/apps"
 
+## Set up the firewall via UWF
+sudo -s <<EOT
+set -e
+cd /etc/ufw
+
+# Make a backup before we modify the file.
+cp before.rules before.rules~$(date --iso-8601=sec)
+
+# Filter out everything between '*nat' and 'COMMIT':
+sed '/^*nat/,/COMMIT/d' -i before.rules
+cat >>before.rules <<EOF
+*nat
+# Forward 80 -> 8080 and 443 -> 8443, so that Flamenco Manager does not need root.
+:PREROUTING ACCEPT [0:0]
+-A PREROUTING -i eth0 -p tcp --dport 80 -j DNAT --to-destination :8080
+-A PREROUTING -i eth0 -p tcp --dport 443 -j DNAT --to-destination :8443
+COMMIT
+EOF
+
+ufw allow OpenSSH
+ufw allow proto tcp from any to any port 80
+ufw allow proto tcp from any to any port 443
+echo y | ufw enable
+ufw reload  # just in case it already was enabled
+EOT
+
+
 ## Install system packages
 sudo -s <<EOT
 apt-get install -qy software-properties-common
