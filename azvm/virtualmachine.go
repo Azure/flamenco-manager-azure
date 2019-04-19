@@ -64,8 +64,8 @@ func ListVMs(ctx context.Context, config azconfig.AZConfig) []string {
 
 // ChooseVM lets the user pick a virtual machine.
 // if vmName is not empty, that name is used instead, and this function just determines whether that VM already exists.
-func ChooseVM(ctx context.Context, config azconfig.AZConfig, vmName string) (chosenVMName string, isExisting bool) {
-	vmNames := ListVMs(ctx, config)
+func ChooseVM(ctx context.Context, config *azconfig.AZConfig, vmName string) (chosenVMName string, isExisting bool) {
+	vmNames := ListVMs(ctx, *config)
 	vmChoices := textio.StrMap(vmNames)
 
 	logger := logrus.WithFields(logrus.Fields{
@@ -76,7 +76,12 @@ func ChooseVM(ctx context.Context, config azconfig.AZConfig, vmName string) (cho
 
 	// If a name was already given, we don't need to prompt any more.
 	if vmName != "" {
+		config.VMName = vmName
+		config.Save()
 		return vmName, vmChoices[vmName]
+	}
+	if config.VMName != "" {
+		return config.VMName, vmChoices[config.VMName]
 	}
 
 	if len(vmNames) > 0 {
@@ -87,6 +92,9 @@ func ChooseVM(ctx context.Context, config azconfig.AZConfig, vmName string) (cho
 	if vmName == "" {
 		logger.Fatal("no name given, aborting")
 	}
+
+	config.VMName = vmName
+	config.Save()
 
 	return vmName, isExisting
 }

@@ -122,7 +122,7 @@ func main() {
 		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
 	}
 	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount)
-	vmName, vmExists := azvm.ChooseVM(ctx, config, cliArgs.vmName)
+	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName)
 
 	// Create & update stuff.
 	if createRG {
@@ -133,6 +133,7 @@ func main() {
 	logrus.WithFields(logrus.Fields{
 		"vmName":         *vm.Name,
 		"publicAddress":  publicIP,
+		"fqdn":           *networkStack.PublicIP.DNSSettings.Fqdn,
 		"privateAddress": networkStack.PrivateIP,
 		"vnet":           *networkStack.VNet.Name,
 	}).Info("found network info")

@@ -30,6 +30,8 @@ type AZConfig struct {
 	BatchAccountName string `json:"batchAccountName,omitempty" yaml:"batchAccountName,omitempty"`
 	// Name of the Azure Storage account that will contain the Flamenco files.
 	StorageAccountName string `json:"storageAccountName,omitempty" yaml:"storageAccountName,omitempty"`
+	// Name of the Virtual Machine that's going to run Flamenco Manager.
+	VMName string `json:"virtualMachine,omitempty" yaml:"virtualMachine,omitempty"`
 }
 
 // Load returns the config file, or hard-exits the process if it cannot be loaded.
@@ -67,6 +69,20 @@ func (azc AZConfig) StorageAccountID() string {
 		azc.SubscriptionID,
 		azc.ResourceGroup,
 		azc.StorageAccountName,
+	)
+}
+
+// DomainName returns the expected public domain name of the Public IP.
+func (azc AZConfig) DomainName() string {
+	if azc.VMName == "" {
+		logrus.Panic("virtual machine name is empty, unable to construct domain name")
+	}
+	if azc.Location == "" {
+		logrus.Panic("location is empty, unable to construct domain name")
+	}
+	return fmt.Sprintf("%s.%s.cloudapp.azure.com",
+		azc.VMName,
+		azc.Location,
 	)
 }
 

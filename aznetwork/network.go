@@ -46,8 +46,8 @@ func getSubnetsClient(config azconfig.AZConfig) network.SubnetsClient {
 
 // CreateNetworkStack creates a virtual network, a public IP, and a NIC.
 func CreateNetworkStack(ctx context.Context, config azconfig.AZConfig, basename string) NetworkStack {
+	publicIP := createPublicIP(ctx, config, basename+"-ip", basename)
 	vnet := createVirtualNetwork(ctx, config, basename+"-vnet")
-	publicIP := createPublicIP(ctx, config, basename+"-ip")
 	nic := createNIC(ctx, config, vnet, publicIP, basename+"-nic")
 	privateIP := findPrivateIP(config, nic)
 	return NetworkStack{vnet, publicIP, privateIP, nic}
@@ -102,11 +102,12 @@ func createVirtualNetwork(ctx context.Context, config azconfig.AZConfig, vnetNam
 	return vnet
 }
 
-func createPublicIP(ctx context.Context, config azconfig.AZConfig, ipName string) network.PublicIPAddress {
+func createPublicIP(ctx context.Context, config azconfig.AZConfig, ipName, dnsName string) network.PublicIPAddress {
 	logger := logrus.WithFields(logrus.Fields{
 		"resourceGroup": config.ResourceGroup,
 		"location":      config.Location,
 		"ipName":        ipName,
+		"dnsName":       dnsName,
 	})
 	logger.Info("creating public IP")
 
@@ -121,6 +122,9 @@ func createPublicIP(ctx context.Context, config azconfig.AZConfig, ipName string
 			PublicIPAddressPropertiesFormat: &network.PublicIPAddressPropertiesFormat{
 				PublicIPAddressVersion:   network.IPv4,
 				PublicIPAllocationMethod: network.Static,
+				DNSSettings: &network.PublicIPAddressDNSSettings{
+					DomainNameLabel: to.StringPtr(dnsName),
+				},
 			},
 		},
 	)
@@ -138,7 +142,10 @@ func createPublicIP(ctx context.Context, config azconfig.AZConfig, ipName string
 		logger.WithError(err).Fatal("error creating public IP address")
 	}
 
-	logger.WithField("publicIP", *ip.PublicIPAddressPropertiesFormat.IPAddress).Info("public IP created")
+	logger.WithFields(logrus.Fields{
+		"publicIP": *ip.PublicIPAddressPropertiesFormat.IPAddress,
+		"fqdn":     *ip.PublicIPAddressPropertiesFormat.DNSSettings.Fqdn,
+	}).Info("public IP created")
 	return ip
 }
 
