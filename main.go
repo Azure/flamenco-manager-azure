@@ -17,6 +17,7 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azssh"
 	"gitlab.com/blender-institute/azure-go-test/azstorage"
 	"gitlab.com/blender-institute/azure-go-test/azvm"
+	"gitlab.com/blender-institute/azure-go-test/flamenco"
 )
 
 const applicationName = "Azure Go Test"
@@ -133,7 +134,7 @@ func main() {
 	logrus.WithFields(logrus.Fields{
 		"vmName":         *vm.Name,
 		"publicAddress":  publicIP,
-		"fqdn":           *networkStack.PublicIP.DNSSettings.Fqdn,
+		"fqdn":           networkStack.FQDN(),
 		"privateAddress": networkStack.PrivateIP,
 		"vnet":           *networkStack.VNet.Name,
 	}).Info("found network info")
@@ -146,7 +147,9 @@ func main() {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}
 
+	// Collect dynamically generated files (or bits of files).
 	fstab := azstorage.EnsureFileShares(ctx, config)
+	flamanYAML := flamenco.ManagerConfig(config, networkStack)
 
 	// Set up the VM via an SSH connection
 	ssh := azssh.Connect(sshContext, publicIP)
@@ -156,6 +159,8 @@ func main() {
 	// Reconnect to ensure the admin user is part of the flamenco group.
 	ssh = azssh.Connect(sshContext, publicIP)
 	ssh.UploadAsFile([]byte(fstab), "fstab-smb")
+	ssh.UploadLocalFile("flamenco-manager.service")
+	ssh.UploadAsFile(flamanYAML, "default-flamenco-manager.yaml")
 	ssh.RunInstallScript()
 	ssh.Close()
 

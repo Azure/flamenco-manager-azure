@@ -2,16 +2,16 @@
 
 set -e
 
-FMANAGER_VERSION="2.4.2-4-g530f260"
+FMANAGER_VERSION="2.4.3-11-g715faa6"
 FWORKER_VERSION="2.3"
 FFMPEG_VERSION="4.1.3"
 
-# TODO: Has to be updated every day, or we should provide a more stable version to download.
-# 'Stable' in the sense that it should keep existing on the server (daily builds are regularly
-# removed).
-BLENDER_VERSION="2.80-e5c5b990c6d3"
+BLENDER_TAR_BZ2=$(curl -s https://builder.blender.org/download/ | grep -oE "(blender-2\.80-[a-z0-9]+-linux-glibc[0-9]+-x86_64\.tar\.bz2)")
+BLENDER_TAR="${BLENDER_TAR_BZ2%.*}"
+BLENDER_DIR="${BLENDER_TAR%.*}"
 
 WORKER_COMPONENTS_DIR="/mnt/flamenco-resources/apps"
+MY_DIR="$(dirname "$(readlink -f "$0")")"
 
 ## Set up the firewall via UWF
 sudo -s <<EOT
@@ -35,6 +35,8 @@ EOF
 ufw allow OpenSSH
 ufw allow proto tcp from any to any port 80
 ufw allow proto tcp from any to any port 443
+ufw allow proto tcp from any to any port 8080
+ufw allow proto tcp from any to any port 8443
 echo y | ufw enable
 ufw reload  # just in case it already was enabled
 EOT
@@ -67,7 +69,7 @@ sudo mkdir -p $(awk '{ print $2 }' < fstab-smb)
 sudo mount -a
 
 echo "Setting up user for Flamenco Manager"
-FM_USER="flamenco-manager"
+FM_USER=flamanager
 if ! getent passwd $FM_USER >/dev/null 2>&1; then
     sudo useradd --groups flamenco --create-home --no-user-group $FM_USER
 fi
@@ -82,7 +84,7 @@ COMPONENTS_DIR=$(pwd)
 wget -qN \
     https://www.flamenco.io/download/flamenco-manager-${FMANAGER_VERSION}-linux.tar.gz \
     https://www.flamenco.io/download/flamenco-worker-${FWORKER_VERSION}-linux.tar.gz \
-    https://builder.blender.org/download/blender-${BLENDER_VERSION}-linux-glibc224-x86_64.tar.bz2 \
+    https://builder.blender.org/download/${BLENDER_TAR_BZ2} \
     https://johnvansickle.com/ffmpeg/releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz
 
 
@@ -98,6 +100,8 @@ if [ ! -e flamenco-manager-${FMANAGER_VERSION} ]; then
 else
     echo "  - Flamenco Manager ${FMANAGER_VERSION} [already installed]"
 fi
+sudo cp $MY_DIR/flamenco-manager.service /etc/systemd/system/
+sudo systemctl daemon-reload
 
 
 # Flamenco Worker components (Worker itself + apps)
@@ -115,10 +119,9 @@ else
     echo "  - Flamenco Worker ${FWORKER_VERSION} [already installed]"
 fi
 
-BLENDER_DIR=blender-${BLENDER_VERSION}-linux-glibc224-x86_64
 if [ ! -e $BLENDER_DIR ]; then
-    echo "  - Blender ${BLENDER_VERSION} -> $WORKER_COMPONENTS_DIR"
-    tar jxf $COMPONENTS_DIR/blender-${BLENDER_VERSION}-linux-glibc224-x86_64.tar.bz2 \
+    echo "  - Blender ${BLENDER_DIR/blender-} -> $WORKER_COMPONENTS_DIR"
+    tar jxf $COMPONENTS_DIR/${BLENDER_TAR_BZ2} \
         --atime-preserve=system --touch
     rm -f blender
     ln -s $BLENDER_DIR blender
@@ -136,3 +139,18 @@ if [ ! -e $FFMPEG_DIR ]; then
 else
     echo "  - FFmpeg ${FFMPEG_VERSION} [already installed]"
 fi
+
+# Configure Flamenco Manager
+cd $MANAGER_HOME
+if [ ! -e flamenco-manager.yaml ]; then
+    echo "Installing default flamenco-manager.yaml"
+    sudo -u $FM_USER cp $MY_DIR/default-flamenco-manager.yaml flamenco-manager.yaml
+else
+    echo "flamenco-manager.yaml already exists, not touching"
+fi
+
+# Start services
+sudo systemctl enable mongod
+sudo systemctl start mongod
+sudo systemctl enable flamenco-manager
+sudo systemctl start flamenco-manager

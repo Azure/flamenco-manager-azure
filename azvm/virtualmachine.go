@@ -33,7 +33,7 @@ func ListVMs(ctx context.Context, config azconfig.AZConfig) []string {
 		"resourceGroup": config.ResourceGroup,
 		"location":      config.Location,
 	})
-	logger.Debug("fetching VM list")
+	logger.Info("fetching VM list")
 
 	vmNames := []string{}
 	vmListPage, err := vmClient.List(ctx, config.ResourceGroup)
@@ -72,7 +72,10 @@ func ChooseVM(ctx context.Context, config *azconfig.AZConfig, vmName string) (ch
 		"resourceGroup": config.ResourceGroup,
 		"location":      config.Location,
 	})
-	logger.WithField("numVMs", len(vmNames)).Info("retrieved list of existing VMs")
+	logger.WithFields(logrus.Fields{
+		"numVMs": len(vmNames),
+		"names":  vmNames,
+	}).Info("retrieved list of existing VMs")
 
 	// If a name was already given, we don't need to prompt any more.
 	if vmName != "" {

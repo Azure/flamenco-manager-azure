@@ -7,7 +7,9 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func (c *Connection) uploadLocalFile(filename string) {
+// UploadLocalFile reads a local file and sends it to the server via SSH.
+// WARNING: the given filename must be a simple name, no spaces, no directory, no need for shell escaping.
+func (c *Connection) UploadLocalFile(filename string) {
 	logger := c.logger.WithField("fileName", filename)
 	contents, err := ioutil.ReadFile(filename)
 	if err != nil {

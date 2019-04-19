@@ -1,0 +1,66 @@
+_meta:
+  version: 2
+manager_name: Flamenco Manager {{ .Name }}
+flamenco: https://cloud.blender.org/
+database_url: mongodb://localhost/flamanager
+task_logs_path: /mnt/flamenco-output/task-logs
+
+listen: ':8080'
+listen_https: ':8443'
+acme_domain_name: {{ .AcmeDomainName }}
+
+own_url: https://{{ .AcmeDomainName }}/ {{- /* needs the public address for TLS certificate validation */}}
+ssdp_discovery: false
+
+shaman:
+  fileStorePath: /mnt/flamenco-input/file-store
+  checkoutPath: /mnt/flamenco-input/jobs
+  garbageCollect:
+    period: 1h
+    maxAge: 240h
+
+worker_registration_secret: "{{ .WorkerRegistrationSecret }}"
+worker_cleanup_status:
+- offline
+- timeout
+
+variables:
+  blender:
+    direction: oneway
+    values:
+       - audience: workers
+         platform: linux
+         value: /mnt/flamenco-resources/apps/blender/blender --factory-startup
+  ffmpeg:
+    direction: oneway
+    values:
+    - audience: workers
+      platform: linux
+      value: /mnt/flamenco-resources/apps/ffmpeg/ffmpeg
+  job_storage:
+    direction: twoway
+    values:
+    - audience: workers
+      platform: linux
+      value: /mnt/flamenco-input/jobs
+  shaman:
+    direction: oneway
+    values:
+    - audience: users
+      platform: linux
+      value: /mnt/flamenco-input/jobs
+  render:
+    direction: twoway
+    values:
+    - audience: users
+      platform: darwin
+      value: /Volume/render
+    - audience: users
+      platform: linux
+      value: /render
+    - audience: users
+      platform: windows
+      value: 'R:'
+    - audience: workers
+      platform: linux
+      value: /mnt/flamenco-output/render

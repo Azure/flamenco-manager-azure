@@ -20,6 +20,11 @@ type NetworkStack struct {
 	Interface network.Interface
 }
 
+// FQDN returns the fully-qualified domain name.
+func (ns *NetworkStack) FQDN() string {
+	return *ns.PublicIP.DNSSettings.Fqdn
+}
+
 func getNicClient(config azconfig.AZConfig) network.InterfacesClient {
 	nicClient := network.NewInterfacesClient(config.SubscriptionID)
 	nicClient.Authorizer = azauth.Load(azure.PublicCloud.ResourceManagerEndpoint)
