@@ -102,16 +102,16 @@ func (c *Connection) loggingRun(logger *logrus.Entry, cmd string, args ...interf
 	func() {
 		for {
 			select {
+			case line := <-stdoutLines:
+				logger.WithField("channel", "stdout").Info(line)
+			case line := <-stderrLines:
+				logger.WithField("channel", "stderr").Info(line)
 			case err := <-doneChan:
 				if err != nil {
 					logger.WithError(err).Fatal("command exited with an error")
 				}
 				logger.Debug("command completed")
 				return
-			case line := <-stdoutLines:
-				logger.WithField("channel", "stdout").Info(line)
-			case line := <-stderrLines:
-				logger.WithField("channel", "stderr").Info(line)
 			case <-time.After(5 * time.Minute):
 				logger.Fatal("timeout waiting for command output")
 			}
