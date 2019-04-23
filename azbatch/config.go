@@ -5,11 +5,14 @@ import (
 	"fmt"
 	"strconv"
 
+	"gitlab.com/blender-institute/azure-go-test/flamenco"
+
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 	"gitlab.com/blender-institute/azure-go-test/aznetwork"
+	"gitlab.com/blender-institute/azure-go-test/azstorage"
 	"gitlab.com/blender-institute/azure-go-test/textio"
 )
 
@@ -21,7 +24,7 @@ func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig) {
 			"vmSize":                 config.Batch.VMSize,
 			"targetDedicatedNodes":   config.Batch.TargetDedicatedNodes,
 			"targetLowPriorityNodes": config.Batch.TargetLowPriorityNodes,
-		}).Info("batch pool already configured")
+		}).Info("batch pool config loaded")
 		return
 	}
 
@@ -30,6 +33,7 @@ func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig) {
 		logrus.Fatal("no batch pool ID given, aborting")
 	}
 
+	fmt.Printf("   for sizes, see https://docs.microsoft.com/azure/batch/batch-pool-vm-sizes")
 	vmSize := textio.ReadLine(ctx, "Desired batch node VM size [Standard_F16s]")
 	if vmSize == "" {
 		vmSize = "Standard_F16s"
@@ -71,12 +75,13 @@ func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig) {
 
 // PoolParameters returns the batch pool parameters.
 func PoolParameters(config azconfig.AZConfig, netStack aznetwork.NetworkStack) batch.PoolAddParameter {
-
+	mountOpts := azstorage.GetMountOptions(config, "flamenco-resources")
 	startCmd := fmt.Sprintf("bash -exc 'sudo mkdir -p /mnt/flamenco-resources; "+
-		"sudo mount -t cifs //%s.file.core.windows.net/flamenco-resources /mnt/flamenco-resources "+
-		"-o vers=3.0,username=%s,password=%s,dir_mode=0777,file_mode=0666,sec=ntlmssp,mfsymlinks; "+
+		"sudo groupadd --force %s; "+
+		"sudo mount -t cifs //%s.file.core.windows.net/flamenco-resources /mnt/flamenco-resources -o %s; "+
 		"bash -ex /mnt/flamenco-resources/flamenco-worker-startup.sh'",
-		config.StorageCreds.Username, config.StorageCreds.Username, config.StorageCreds.Password,
+		flamenco.UnixGroupName,
+		config.StorageCreds.Username, mountOpts,
 	)
 
 	return batch.PoolAddParameter{
@@ -112,5 +117,4 @@ func PoolParameters(config azconfig.AZConfig, netStack aznetwork.NetworkStack) b
 			},
 		},
 	}
-
 }

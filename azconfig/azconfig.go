@@ -1,10 +1,13 @@
 package azconfig
 
 import (
+	"crypto/rand"
+	"encoding/base64"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
@@ -41,6 +44,8 @@ type AZConfig struct {
 	StorageAccountName string `yaml:"storageAccountName,omitempty"`
 	// Name of the Virtual Machine that's going to run Flamenco Manager.
 	VMName string `yaml:"virtualMachine,omitempty"`
+	// Worker registration secret; shouldn't change, as we don't overwrite the Manager config if it already exists on the VM.
+	WorkerRegistrationSecret string `yaml:"workerRegistrationSecret,omitempty"`
 
 	// this is set by main.go after creating the storage account.
 	StorageCreds StorageCredentials `yaml:"-"`
@@ -73,6 +78,12 @@ func Load() AZConfig {
 	if params.Location == "" {
 		logger.Fatal("property 'location' must be set")
 	}
+
+	if params.WorkerRegistrationSecret == "" {
+		logger.Info("generating random worker secret")
+		params.WorkerRegistrationSecret = randomWorkerSecret()
+	}
+
 	return params
 }
 
@@ -131,4 +142,13 @@ func (azc AZConfig) Save() {
 			"renameTo":      azc.filename,
 		}).Fatal("unable to rename configuration file")
 	}
+}
+
+func randomWorkerSecret() string {
+	randomBytes := make([]byte, 64)
+	if _, err := rand.Read(randomBytes); err != nil {
+		logrus.WithError(err).Fatal("error reading random bytes")
+	}
+	secret := strings.Trim(base64.URLEncoding.EncodeToString(randomBytes), "=")
+	return secret
 }

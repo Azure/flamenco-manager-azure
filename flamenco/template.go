@@ -2,16 +2,13 @@ package flamenco
 
 import (
 	"bytes"
-	"crypto/rand"
-	"encoding/base64"
 	"path"
 	"strings"
 	"text/template"
 
-	"gitlab.com/blender-institute/azure-go-test/aznetwork"
-
 	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
+	"gitlab.com/blender-institute/azure-go-test/aznetwork"
 )
 
 // TemplateContext contains everything necessary for rendering templates.
@@ -21,6 +18,7 @@ type TemplateContext struct {
 	PrivateIP                string
 	WorkerRegistrationSecret string
 	FSTabForStorage          string
+	UnixGroupName            string
 }
 
 // NewTemplateContext constructs a new context for rendering templated config files.
@@ -29,17 +27,13 @@ func NewTemplateContext(
 	netStack aznetwork.NetworkStack,
 	fstab string,
 ) TemplateContext {
-	randomBytes := make([]byte, 64)
-	if _, err := rand.Read(randomBytes); err != nil {
-		logrus.WithError(err).Fatal("error reading random bytes")
-	}
-
 	ctx := TemplateContext{
 		Name:                     strings.Title(config.VMName),
 		AcmeDomainName:           netStack.FQDN(),
 		PrivateIP:                netStack.PrivateIP,
-		WorkerRegistrationSecret: base64.URLEncoding.EncodeToString(randomBytes),
+		WorkerRegistrationSecret: config.WorkerRegistrationSecret,
 		FSTabForStorage:          fstab,
+		UnixGroupName:            UnixGroupName,
 	}
 	return ctx
 }

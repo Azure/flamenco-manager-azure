@@ -49,25 +49,28 @@ else
     apt-get install libgl1-mesa-dev libglu1-mesa-dev libx11-dev libxi6 libxrender1 -y
 fi
 
-groupadd --force flamenco  # --force makes sure it doesn't fail when the group already exists
-adduser _azbatch flamenco
-adduser $USER flamenco
+groupadd --force {{ .UnixGroupName }}  # --force makes sure it doesn't fail when the group already exists
+adduser _azbatch {{ .UnixGroupName }}
+adduser $USER {{ .UnixGroupName }}
 
 echo === Preparing SMB shares ===
+cat > fstab-smb <<EOT
+{{ .FSTabForStorage }}
+EOT
 (
     grep -v 'file.core.windows.net' < /etc/fstab
     echo "# Azure SMB shares from file.core.windows.net:"
-    cat <<EOT
-{{ .FSTabForStorage }}
-EOT
-) > new-fstab
-sudo cp new-fstab /etc/fstab
-mount -a
+    cat fstab-smb
+) > fstab-new
+sudo cp fstab-new /etc/fstab
+sudo mkdir -p $(awk '{ print $2 }' < fstab-smb)
+# Mount all SMB mountpoints, except 'flamenco-resources' -- it's already mounted and somehow it can get mounted twice.
+awk '{ print $2 }' < fstab-smb | grep -v flamenco-resources | sudo xargs -n1 mount
 
 echo === Installing Azure Preempt Monitor service ===
 systemctl stop azure-preempt-monitor.service || true
-cp /mnt/flamenco-resources/azure-preempt-monitor /usr/local/bin
-cp /mnt/flamenco-resources/azure-preempt-monitor.service /etc/systemd/system
+cp /mnt/flamenco-resources/apps/azure-preempt-monitor/azure-preempt-monitor /usr/local/bin
+cp /mnt/flamenco-resources/apps/azure-preempt-monitor/azure-preempt-monitor.service /etc/systemd/system
 echo "daemon   ALL = NOPASSWD: /bin/systemctl" > /etc/sudoers.d/50-azure-preempt-monitor
 chmod 755 /usr/local/bin/azure-preempt-monitor
 systemctl daemon-reload

@@ -6,10 +6,11 @@ import (
 	"net/url"
 	"strings"
 
+	"gitlab.com/blender-institute/azure-go-test/flamenco"
+
 	"github.com/Azure/azure-storage-file-go/azfile"
 	"github.com/sirupsen/logrus"
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
-	"gitlab.com/blender-institute/azure-go-test/flamenco"
 )
 
 const (
@@ -18,11 +19,17 @@ const (
 	statusShareAlreadyExists = "ShareAlreadyExists"
 )
 
+// Share has some options for SMB share mountpoints.
+type Share struct {
+	fileMode int16
+}
+
 var (
-	defaultSMBShares = []string{
-		"flamenco-resources",
-		"flamenco-input",
-		"flamenco-output",
+	// DefaultSMBShares has the shares that will be mounted on both the Manager and the Workers.
+	DefaultSMBShares = map[string]Share{
+		"flamenco-resources": Share{fileMode: 0775},
+		"flamenco-input":     Share{fileMode: 0660},
+		"flamenco-output":    Share{fileMode: 0660},
 	}
 )
 
@@ -30,20 +37,39 @@ var (
 func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
 	fstab := []string{}
 	shareURL := getShareURL(config)
-	for _, shareName := range defaultSMBShares {
+	for shareName := range DefaultSMBShares {
 		createFileShare(ctx, shareURL, shareName)
 
-		fstabLine := fmt.Sprintf(
-			"//%s.file.core.windows.net/%s /mnt/%s cifs vers=3.0,username=%s,password=%s,dir_mode=0770,file_mode=0660,gid=%s,forcegid,sec=ntlmssp,mfsymlinks 0 0",
-			config.StorageAccountName,
-			shareName, shareName,
-			config.StorageCreds.Username, config.StorageCreds.Password,
-			flamenco.UnixGroupName,
-		)
-
+		fstabLine := GetFSTabLine(config, shareName)
 		fstab = append(fstab, fstabLine)
 	}
 	return strings.Join(fstab, "\n") + "\n"
+}
+
+// GetFSTabLine returns the /etc/fstab line for the given share.
+func GetFSTabLine(config azconfig.AZConfig, shareName string) string {
+	mountOpts := GetMountOptions(config, shareName)
+
+	return fmt.Sprintf(
+		"//%s.file.core.windows.net/%s /mnt/%s cifs %s 0 0",
+		config.StorageAccountName,
+		shareName, shareName,
+		mountOpts,
+	)
+}
+
+// GetMountOptions returns the mount options for the given SMB share.
+func GetMountOptions(config azconfig.AZConfig, shareName string) string {
+	shareOptions, found := DefaultSMBShares[shareName]
+	if !found {
+		logrus.WithField("shareName", shareName).Fatal("share name unknown")
+	}
+
+	return fmt.Sprintf(
+		"vers=3.0,username=%s,password=%s,dir_mode=0770,file_mode=%#o,gid=%s,forcegid,sec=ntlmssp,mfsymlinks",
+		config.StorageCreds.Username, config.StorageCreds.Password,
+		shareOptions.fileMode, flamenco.UnixGroupName,
+	)
 }
 
 func getShareURL(config azconfig.AZConfig) azfile.ServiceURL {
