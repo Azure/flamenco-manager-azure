@@ -150,10 +150,9 @@ else
 fi
 
 # Configure Flamenco Worker
-mkdir -p /mnt/flamenco-resources/worker
-cd /mnt/flamenco-resources/worker
+cd /mnt/flamenco-resources
 echo "Configuring Flamenco Worker"
-cp $MY_DIR/default-flamenco-worker.cfg ./flamenco-worker.cfg
+cp $MY_DIR/flamenco-worker.cfg ./flamenco-worker.cfg
 
 
 # Start services
