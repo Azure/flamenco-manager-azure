@@ -1,4 +1,5 @@
 /vendor/
+/dist/
 /*_credentials.json
 /deploy-flamenco-manager
 /deploy-flamenco-manager-v*
