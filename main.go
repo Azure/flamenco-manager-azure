@@ -77,6 +77,7 @@ func logStartup() {
 }
 
 func main() {
+	startupTime := time.Now()
 	parseCliArgs()
 	if cliArgs.version {
 		fmt.Println(applicationVersion)
@@ -171,4 +172,10 @@ func main() {
 	// azbatch.CreatePool(config)
 
 	cancelCtx()
+
+	duration := time.Now().Sub(startupTime)
+	logrus.WithFields(logrus.Fields{
+		"duration": duration,
+		"url":      fmt.Sprintf("https://%s/setup", networkStack.FQDN()),
+	}).Info("deployment complete")
 }
