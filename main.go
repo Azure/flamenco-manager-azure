@@ -104,12 +104,12 @@ func main() {
 	sshContext := azssh.LoadSSHContext()
 
 	// Determine what to create and what to assume is there.
-	// sa = Storage Account; ba = Batch Account
+	// rg = Resource Group; sa = Storage Account; ba = Batch Account
 	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup)
 	if createRG {
 		azresource.EnsureResourceGroup(ctx, &config, rgName)
 	}
-
+	azbatch.AskParametersAndSave(ctx, &config)
 	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount)
 	if createSA && !azstorage.CheckAvailability(ctx, config, saName) {
 		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
@@ -161,7 +161,7 @@ func main() {
 	ssh.RunInstallScript()
 	ssh.Close()
 
-	// azbatch.CreatePool(config)
+	azbatch.CreatePool(config, networkStack)
 
 	cancelCtx()
 

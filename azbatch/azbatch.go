@@ -17,6 +17,14 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+func getPoolClient(batchURL string) batch.PoolClient {
+	poolClient := batch.NewPoolClient(batchURL)
+	poolClient.Authorizer = azauth.Load(azure.PublicCloud.BatchManagementEndpoint)
+	// poolClient.RequestInspector = azdebug.LogRequest()
+	// poolClient.ResponseInspector = azdebug.LogResponse()
+	return poolClient
+}
+
 // CreatePool starts a pool of Flamenco Workers.
 func CreatePool(config azconfig.AZConfig, netStack aznetwork.NetworkStack) {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
@@ -33,13 +41,9 @@ func constructBatchURL(config azconfig.AZConfig) string {
 
 func createPoolIfNotExist(ctx context.Context, batchURL string, poolParams batch.PoolAddParameter) {
 	logger := logrus.WithField("pool_id", *poolParams.ID)
+	logrus.Info("fetching batch pools")
+	poolClient := getPoolClient(batchURL)
 
-	poolClient := batch.NewPoolClient(batchURL)
-	poolClient.Authorizer = azauth.Load(azure.PublicCloud.BatchManagementEndpoint)
-	// poolClient.RequestInspector = azdebug.LogRequest()
-	// poolClient.ResponseInspector = azdebug.LogResponse()
-
-	logrus.Debug("fetching pools")
 	poolExists := false
 	resultPage, err := poolClient.List(ctx, "", "", "", nil, nil, nil, nil, nil)
 	if err != nil {
