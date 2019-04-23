@@ -14,7 +14,6 @@ func (c *Connection) SetupUsers() {
 
 // RunInstallScript sends the install script to the VM and runs it there.
 func (c *Connection) RunInstallScript() {
-	c.UploadLocalFile(flamenco.InstallScriptName)
 	c.run("chmod +x %s", flamenco.InstallScriptName)
 
 	c.loggingRun(c.logger, "bash %s", flamenco.InstallScriptName)

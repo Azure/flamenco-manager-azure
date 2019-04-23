@@ -168,6 +168,7 @@ func main() {
 	ssh.UploadAsFile(flamanYAML, "default-flamenco-manager.yaml")
 	ssh.UploadAsFile(flaworkCfg, "flamenco-worker.cfg")
 	ssh.UploadAsFile(flaworkStart, "flamenco-worker-startup.sh")
+	ssh.UploadLocalFile(flamenco.InstallScriptName)
 	ssh.RunInstallScript()
 	ssh.Close()
 
