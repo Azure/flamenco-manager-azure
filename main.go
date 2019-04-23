@@ -27,10 +27,9 @@ var applicationVersion = "1.0"
 // Components that make up the application
 
 var cliArgs struct {
-	version        bool
-	quiet          bool
-	debug          bool
-	showStartupCLI bool
+	version bool
+	quiet   bool
+	debug   bool
 
 	resourceGroup  string
 	storageAccount string
@@ -42,7 +41,6 @@ func parseCliArgs() {
 	flag.BoolVar(&cliArgs.version, "version", false, "Shows the application version, then exits.")
 	flag.BoolVar(&cliArgs.quiet, "quiet", false, "Disable info-level logging (so warning/error only).")
 	flag.BoolVar(&cliArgs.debug, "debug", false, "Enable debug-level logging.")
-	flag.BoolVar(&cliArgs.showStartupCLI, "startupCLI", false, "Just show the startup task CLI, do not start the pool.")
 	flag.StringVar(&cliArgs.resourceGroup, "group", "", "Name of the resource group. If not given, it will be prompted for.")
 	flag.StringVar(&cliArgs.storageAccount, "sa", "", "Name of the storage account. If not given, it will be prompted for.")
 	flag.StringVar(&cliArgs.batchAccount, "ba", "", "Name of the batch account. If not given, it will be prompted for.")
@@ -103,17 +101,6 @@ func main() {
 	}()
 
 	config := azconfig.Load()
-	if cliArgs.showStartupCLI {
-		ctx, cancel := context.WithDeadline(ctx, time.Now().Add(1*time.Minute))
-		defer cancel()
-
-		poolParams := azbatch.PoolParameters()
-		withCreds := azstorage.ReplaceAccountDetails(ctx, config, poolParams)
-		fmt.Println(*withCreds.StartTask.CommandLine)
-		logrus.Info("shutting down after logging account storage key stuff")
-		return
-	}
-
 	sshContext := azssh.LoadSSHContext()
 
 	// Determine what to create and what to assume is there.
