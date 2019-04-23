@@ -17,9 +17,8 @@ func (c *Connection) RunInstallScript() {
 	c.UploadLocalFile(flamenco.InstallScriptName)
 	c.run("chmod +x %s", flamenco.InstallScriptName)
 
-	result := c.run("bash %s", flamenco.InstallScriptName)
+	c.loggingRun(c.logger, "bash %s", flamenco.InstallScriptName)
 	c.logger.WithFields(logrus.Fields{
-		"output":     result,
 		"scriptName": flamenco.InstallScriptName,
 	}).Info("installation script completed")
 }
