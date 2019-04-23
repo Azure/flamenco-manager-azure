@@ -9,7 +9,7 @@ listen: ':8080'
 listen_https: ':8443'
 acme_domain_name: {{ .AcmeDomainName }}
 
-own_url: https://{{ .AcmeDomainName }}/ {{- /* needs the public address for TLS certificate validation */}}
+own_url: https://{{ .AcmeDomainName }}/
 ssdp_discovery: false
 
 shaman:

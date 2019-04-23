@@ -150,7 +150,9 @@ func main() {
 
 	// Collect dynamically generated files (or bits of files).
 	fstab := azstorage.EnsureFileShares(ctx, config)
-	flamanYAML := flamenco.ManagerConfig(config, networkStack)
+	tmpl := flamenco.NewTemplateContext(config, networkStack)
+	flamanYAML := tmpl.RenderTemplate("flamenco-manager.yaml")
+	flaworkCfg := tmpl.RenderTemplate("flamenco-worker.cfg")
 
 	// Set up the VM via an SSH connection
 	ssh := azssh.Connect(sshContext, publicIP)
@@ -162,6 +164,7 @@ func main() {
 	ssh.UploadAsFile([]byte(fstab), "fstab-smb")
 	ssh.UploadLocalFile("flamenco-manager.service")
 	ssh.UploadAsFile(flamanYAML, "default-flamenco-manager.yaml")
+	ssh.UploadAsFile(flaworkCfg, "default-flamenco-worker.cfg")
 	ssh.RunInstallScript()
 	ssh.Close()
 

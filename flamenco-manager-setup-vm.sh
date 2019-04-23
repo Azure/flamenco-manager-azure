@@ -149,7 +149,15 @@ else
     echo "flamenco-manager.yaml already exists, not touching"
 fi
 
+# Configure Flamenco Worker
+mkdir -p /mnt/flamenco-resources/worker
+cd /mnt/flamenco-resources/worker
+echo "Configuring Flamenco Worker"
+cp $MY_DIR/default-flamenco-worker.cfg ./flamenco-worker.cfg
+
+
 # Start services
+echo "Starting services"
 sudo systemctl enable mongod
 sudo systemctl start mongod
 sudo systemctl enable flamenco-manager
