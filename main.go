@@ -132,6 +132,8 @@ func main() {
 	if createSA {
 		azstorage.CreateAndSave(ctx, &config, saName)
 	}
+	azstorage.GetCredentials(ctx, &config)
+
 	if createBA {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}

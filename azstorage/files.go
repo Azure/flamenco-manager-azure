@@ -28,10 +28,8 @@ var (
 
 // EnsureFileShares sets up the SMB shares. Returns fstab lines to mount them.
 func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
-	storageCreds := GetCredentials(ctx, config)
-
 	fstab := []string{}
-	shareURL := getShareURL(config, storageCreds)
+	shareURL := getShareURL(config)
 	for _, shareName := range defaultSMBShares {
 		createFileShare(ctx, shareURL, shareName)
 
@@ -39,7 +37,7 @@ func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
 			"//%s.file.core.windows.net/%s /mnt/%s cifs vers=3.0,username=%s,password=%s,dir_mode=0770,file_mode=0660,gid=%s,forcegid,sec=ntlmssp,mfsymlinks 0 0",
 			config.StorageAccountName,
 			shareName, shareName,
-			storageCreds.Username, storageCreds.Password,
+			config.StorageCreds.Username, config.StorageCreds.Password,
 			flamenco.UnixGroupName,
 		)
 
@@ -48,13 +46,13 @@ func EnsureFileShares(ctx context.Context, config azconfig.AZConfig) string {
 	return strings.Join(fstab, "\n") + "\n"
 }
 
-func getShareURL(config azconfig.AZConfig, storageCreds Credentials) azfile.ServiceURL {
+func getShareURL(config azconfig.AZConfig) azfile.ServiceURL {
 	logger := logrus.WithFields(logrus.Fields{
 		"storageAccount": config.StorageAccountName,
 	})
 
 	// Use your Storage account's name and key to create a credential object; this is used to access your account.
-	credential, err := azfile.NewSharedKeyCredential(storageCreds.Username, storageCreds.Password)
+	credential, err := azfile.NewSharedKeyCredential(config.StorageCreds.Username, config.StorageCreds.Password)
 	if err != nil {
 		logger.WithError(err).Fatal("unable to construct credentials for Azure Files")
 	}

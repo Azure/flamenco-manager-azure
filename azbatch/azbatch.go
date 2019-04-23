@@ -2,12 +2,10 @@ package azbatch
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"os"
 	"time"
 
-	"gitlab.com/blender-institute/azure-go-test/azstorage"
+	"gitlab.com/blender-institute/azure-go-test/aznetwork"
 
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 
@@ -19,45 +17,18 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	batchParamFile = "azure_batch_pool.json"
-)
-
 // CreatePool starts a pool of Flamenco Workers.
-func CreatePool(config azconfig.AZConfig) {
+func CreatePool(config azconfig.AZConfig, netStack aznetwork.NetworkStack) {
 	ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(1*time.Minute))
 	defer cancel()
 
-	poolParams := PoolParameters()
-	poolParams = azstorage.ReplaceAccountDetails(ctx, config, poolParams)
-
+	poolParams := PoolParameters(config, netStack)
 	batchURL := constructBatchURL(config)
 	createPoolIfNotExist(ctx, batchURL, poolParams)
 }
 
 func constructBatchURL(config azconfig.AZConfig) string {
 	return fmt.Sprintf("https://%s.%s.batch.azure.com", config.BatchAccountName, config.Location)
-}
-
-// PoolParameters loads batchParamFile and returns it parsed.
-func PoolParameters() batch.PoolAddParameter {
-	logger := logrus.WithField("filename", batchParamFile)
-	paramFile, err := os.Open(batchParamFile)
-	if err != nil {
-		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
-	}
-	defer paramFile.Close()
-
-	params := batch.PoolAddParameter{}
-	decoder := json.NewDecoder(paramFile)
-	if err := decoder.Decode(&params); err != nil {
-		logger.WithError(err).Fatal("unable to decode Azure Batch pool parameters")
-	}
-
-	if params.ID == nil {
-		logger.Fatal("pool parameter 'id' must be set")
-	}
-	return params
 }
 
 func createPoolIfNotExist(ctx context.Context, batchURL string, poolParams batch.PoolAddParameter) {

@@ -7,15 +7,9 @@ import (
 	"gitlab.com/blender-institute/azure-go-test/azconfig"
 )
 
-// Credentials has everything you need to mount a file share from a storage account.
-type Credentials struct {
-	Username string // the storage account name
-	Password string // the storage account key
-}
-
 // GetCredentials obtains the credentials to mount shares from the storage account.
-func GetCredentials(ctx context.Context, config azconfig.AZConfig) Credentials {
-	accountClient := getAccountClient(config)
+func GetCredentials(ctx context.Context, config *azconfig.AZConfig) {
+	accountClient := getAccountClient(*config)
 	logger := logrus.WithFields(logrus.Fields{
 		"storageAccountName": config.StorageAccountName,
 		"resourceGroup":      config.ResourceGroup,
@@ -32,8 +26,10 @@ func GetCredentials(ctx context.Context, config azconfig.AZConfig) Credentials {
 	}
 
 	firstKey := (*result.Keys)[0]
-	return Credentials{
+	creds := azconfig.StorageCredentials{
 		Username: config.StorageAccountName,
 		Password: *firstKey.Value,
 	}
+
+	config.StorageCreds = creds
 }

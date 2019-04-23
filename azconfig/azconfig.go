@@ -14,24 +14,38 @@ const (
 	configFile = "azure_config.yaml"
 )
 
+// AZBatchConfig has all the batch parameters.
+type AZBatchConfig struct {
+	PoolID string `yaml:"poolID"` // name of the batch pool
+	VMSize string `yaml:"vmSize"` // machine size, like "Standard_F16s"
+
+	TargetDedicatedNodes   int32 `yaml:"targetDedicatedNodes"`
+	TargetLowPriorityNodes int32 `yaml:"targetLowPriorityNodes"`
+}
+
 // AZConfig is loaded from azure_config.yaml
 type AZConfig struct {
 	// File this config was read from, so it can be saved after modification.
 	filename string
 
 	// ID of the Azure subscription. It is the "id" field shown by `az account list`
-	SubscriptionID string `json:"subscriptionID" yaml:"subscriptionID"`
+	SubscriptionID string ` yaml:"subscriptionID"`
 	// Physical location of the resource group, such as 'westeurope' or 'eastus'.
-	Location string `json:"location" yaml:"location"`
+	Location string ` yaml:"location"`
 
 	// Name of the resource group that will contain the Flamenco infrastructure.
-	ResourceGroup string `json:"resourceGroup,omitempty" yaml:"resourceGroup,omitempty"`
+	ResourceGroup string `yaml:"resourceGroup,omitempty"`
 	// Name of the Azure Batch account that will contain the Flamenco Worker VM pool.
-	BatchAccountName string `json:"batchAccountName,omitempty" yaml:"batchAccountName,omitempty"`
+	BatchAccountName string `yaml:"batchAccountName,omitempty"`
 	// Name of the Azure Storage account that will contain the Flamenco files.
-	StorageAccountName string `json:"storageAccountName,omitempty" yaml:"storageAccountName,omitempty"`
+	StorageAccountName string `yaml:"storageAccountName,omitempty"`
 	// Name of the Virtual Machine that's going to run Flamenco Manager.
-	VMName string `json:"virtualMachine,omitempty" yaml:"virtualMachine,omitempty"`
+	VMName string `yaml:"virtualMachine,omitempty"`
+
+	// this is set by main.go after creating the storage account.
+	StorageCreds StorageCredentials `yaml:"-"`
+
+	Batch *AZBatchConfig `yaml:"batch,omitempty"`
 }
 
 // Load returns the config file, or hard-exits the process if it cannot be loaded.

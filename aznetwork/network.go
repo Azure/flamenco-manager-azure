@@ -25,6 +25,16 @@ func (ns *NetworkStack) FQDN() string {
 	return *ns.PublicIP.DNSSettings.Fqdn
 }
 
+// SubnetID returns the subnet ID
+func (ns *NetworkStack) SubnetID() string {
+	if ns.Interface.IPConfigurations == nil || len(*ns.Interface.IPConfigurations) == 0 {
+		logrus.WithField("nicID", *ns.Interface.ID).Fatal("NIC has no IP configurations")
+	}
+
+	ipConfig := (*ns.Interface.IPConfigurations)[0]
+	return *ipConfig.Subnet.ID
+}
+
 func getNicClient(config azconfig.AZConfig) network.InterfacesClient {
 	nicClient := network.NewInterfacesClient(config.SubscriptionID)
 	nicClient.Authorizer = azauth.Load(azure.PublicCloud.ResourceManagerEndpoint)
