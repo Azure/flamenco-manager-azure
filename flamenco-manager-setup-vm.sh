@@ -119,8 +119,9 @@ else
     echo "  - Flamenco Worker ${FWORKER_VERSION} [already installed]"
 fi
 
+BLENDER_VERSION=${BLENDER_DIR/blender-}
 if [ ! -e $BLENDER_DIR ]; then
-    echo "  - Blender ${BLENDER_DIR/blender-} -> $WORKER_COMPONENTS_DIR"
+    echo "  - Blender ${BLENDER_VERSION} -> $WORKER_COMPONENTS_DIR"
     tar jxf $COMPONENTS_DIR/${BLENDER_TAR_BZ2} \
         --atime-preserve=system --touch
     rm -f blender
