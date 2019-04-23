@@ -32,7 +32,7 @@ func keyfileAuther() ssh.AuthMethod {
 	// Create the Signer for this private key.
 	signer, err := ssh.ParsePrivateKey(key)
 	if err != nil {
-		logger.WithError(err).Info("unable to parse private key")
+		logger.WithField("reason", err).Info("unable to parse private key file")
 		return nil
 	}
 
