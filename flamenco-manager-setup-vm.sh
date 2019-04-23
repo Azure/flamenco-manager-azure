@@ -5,6 +5,7 @@ set -e
 FMANAGER_VERSION="2.4.3-11-g715faa6"
 FWORKER_VERSION="2.3"
 FFMPEG_VERSION="4.1.3"
+AZURE_PREEMPT_MONITOR_VERSION="1.0-11-g6bf8b09"
 
 BLENDER_TAR_BZ2=$(curl -s https://builder.blender.org/download/ | grep -oE "(blender-2\.80-[a-z0-9]+-linux-glibc[0-9]+-x86_64\.tar\.bz2)")
 BLENDER_TAR="${BLENDER_TAR_BZ2%.*}"
@@ -84,6 +85,7 @@ COMPONENTS_DIR=$(pwd)
 wget -qN \
     https://www.flamenco.io/download/flamenco-manager-${FMANAGER_VERSION}-linux.tar.gz \
     https://www.flamenco.io/download/flamenco-worker-${FWORKER_VERSION}-linux.tar.gz \
+    https://flamenco.io/download/azure-preempt-monitor/azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION}-linux.tar.gz \
     https://builder.blender.org/download/${BLENDER_TAR_BZ2} \
     https://johnvansickle.com/ffmpeg/releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz
 
@@ -117,6 +119,16 @@ if [ ! -e flamenco-worker-${FWORKER_VERSION} ]; then
     ln -s flamenco-worker-${FWORKER_VERSION} flamenco-worker
 else
     echo "  - Flamenco Worker ${FWORKER_VERSION} [already installed]"
+fi
+
+if [ ! -e azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION} ]; then
+    echo "  - Azure Preempt Monitor ${AZURE_PREEMPT_MONITOR_VERSION} -> $WORKER_COMPONENTS_DIR"
+    tar zxf $COMPONENTS_DIR/azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION}-linux.tar.gz \
+        --atime-preserve=system --touch
+    rm -f azure-preempt-monitor
+    ln -s azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION} azure-preempt-monitor
+else
+    echo "  - Azure Preempt Monitor ${AZURE_PREEMPT_MONITOR_VERSION} [already installed]"
 fi
 
 BLENDER_VERSION=${BLENDER_DIR/blender-}
