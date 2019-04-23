@@ -2,6 +2,7 @@ package azssh
 
 import (
 	"io/ioutil"
+	"path"
 	"strings"
 
 	"github.com/sirupsen/logrus"
@@ -11,7 +12,8 @@ import (
 // WARNING: the given filename must be a simple name, no spaces, no directory, no need for shell escaping.
 func (c *Connection) UploadLocalFile(filename string) {
 	logger := c.logger.WithField("fileName", filename)
-	contents, err := ioutil.ReadFile(filename)
+
+	contents, err := ioutil.ReadFile(path.Join("files-static", filename))
 	if err != nil {
 		logger.WithError(err).Fatal("unable to read file")
 	}

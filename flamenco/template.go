@@ -5,7 +5,6 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"path"
-	"runtime"
 	"strings"
 	"text/template"
 
@@ -48,13 +47,7 @@ func NewTemplateContext(
 // RenderTemplate renders a templated config file.
 func (tc *TemplateContext) RenderTemplate(templateFile string) []byte {
 	logger := logrus.WithField("templateFile", templateFile)
-
-	_, myFile, _, ok := runtime.Caller(0)
-	if !ok {
-		logger.Panic("unable to determine source file location")
-	}
-	myDir := path.Dir(myFile)
-	templatePath := path.Join(path.Dir(myDir), "templates", templateFile)
+	templatePath := path.Join("files-templated", templateFile)
 	tmpl := template.Must(template.ParseFiles(templatePath))
 
 	buf := bytes.NewBuffer([]byte{})
