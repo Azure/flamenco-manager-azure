@@ -58,6 +58,11 @@ func sshAgent() ssh.AuthMethod {
 		return nil
 	}
 
+	if len(keys) == 0 {
+		logger.WithError(err).Warning("no keys loaded in SSH agent")
+		return nil
+	}
+
 	logger.WithField("keysKnown", len(keys)).Info("using SSH agent")
 	return ssh.PublicKeysCallback(agentClient.Signers)
 }
