@@ -153,7 +153,7 @@ fi
 cd /mnt/flamenco-resources
 echo "Configuring Flamenco Worker"
 cp $MY_DIR/flamenco-worker.cfg ./flamenco-worker.cfg
-
+cp $MY_DIR/flamenco-worker-startup.sh ./flamenco-worker-startup.sh
 
 # Start services
 echo "Starting services"

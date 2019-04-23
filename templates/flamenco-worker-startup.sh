@@ -13,12 +13,6 @@ set -e
 #     FLAMENCO_AZ_STORAGE_KEY=afdliGF3ADdsf4f98fvklcvh1/4+1f93FBA==
 #     AZ_BATCH_ACCOUNT_NAME=flamenco
 #     AZ_BATCH_ACCOUNT_URL=https://flamenco.westeurope.batch.azure.com/
-#     AZ_BATCH_APP_PACKAGE_blender=/mnt/batch/tasks/applications/blender2.80-daily-2019-10-142019-01-15-09-19
-#     AZ_BATCH_APP_PACKAGE_blender_2_80_daily_2019_10_14=/mnt/batch/tasks/applications/blender2.80-daily-2019-10-142019-01-15-09-19
-#     AZ_BATCH_APP_PACKAGE_ffmpeg=/mnt/batch/tasks/applications/ffmpeg4.12019-01-15-09-16
-#     AZ_BATCH_APP_PACKAGE_ffmpeg_4_1=/mnt/batch/tasks/applications/ffmpeg4.12019-01-15-09-16
-#     AZ_BATCH_APP_PACKAGE_flamenco_worker=/mnt/batch/tasks/applications/flamenco-worker2.2.12019-01-15-08-52
-#     AZ_BATCH_APP_PACKAGE_flamenco_worker_2_2_1=/mnt/batch/tasks/applications/flamenco-worker2.2.12019-01-15-08-52
 #     AZ_BATCH_CERTIFICATES_DIR=/mnt/batch/tasks/startup/certs
 #     AZ_BATCH_NODE_ID=tvm-383584635_1-20190115t092314z
 #     AZ_BATCH_NODE_IS_DEDICATED=true
@@ -59,32 +53,16 @@ groupadd --force flamenco  # --force makes sure it doesn't fail when the group a
 adduser _azbatch flamenco
 adduser $USER flamenco
 
-if [ -z "${FLAMENCO_AZ_STORAGE_ACCOUNT}" ]; then
-    echo +++ SKIPPING Preparing Blender Animation Studio infrastructure +++
-else
-    echo === Preparing Blender Animation Studio infrastructure ===
-    mkdir -p /render
-
-    # Remove existing entry for /render from fstab
-    sed '/ \/render /d' -i /etc/fstab
-
-    # Create a new entry so we're sure the storage account credentials are ok.
-    echo "//${FLAMENCO_AZ_STORAGE_ACCOUNT}.file.core.windows.net/render /render cifs vers=3.0,username=${FLAMENCO_AZ_STORAGE_ACCOUNT},password=${FLAMENCO_AZ_STORAGE_KEY},dir_mode=0775,file_mode=0664,uid=_azbatch,forceuid,gid=_azbatchgrp,forcegid,sec=ntlmssp,mfsymlinks 0 0" >> /etc/fstab
-
-    # If mounted, unmount.
-    grep ' /render ' /proc/mounts && umount /render
-
-    mount /render
-fi
-
-if [ -z "$AZ_BATCH_APP_PACKAGE_flamenco_worker" ]; then
-    echo +++ SKIPPING Symlinking applications +++
-else
-    echo === Symlinking applications ===
-    ln -sf $AZ_BATCH_APP_PACKAGE_flamenco_worker /mnt/batch/tasks/applications/flamenco-worker
-    ln -sf $AZ_BATCH_APP_PACKAGE_blender /mnt/batch/tasks/applications/blender
-    ln -sf $AZ_BATCH_APP_PACKAGE_ffmpeg /mnt/batch/tasks/applications/ffmpeg
-fi
+echo === Preparing SMB shares ===
+(
+    grep -v 'file.core.windows.net' < /etc/fstab
+    echo "# Azure SMB shares from file.core.windows.net:"
+    cat <<EOT
+{{ .FSTabForStorage }}
+EOT
+) > new-fstab
+sudo cp new-fstab /etc/fstab
+mount -a
 
 echo === Installing Azure Preempt Monitor service ===
 systemctl stop azure-preempt-monitor.service || true
@@ -114,7 +92,7 @@ After=network-online.target
 [Service]
 Type=simple
 
-ExecStart=$AZ_BATCH_APP_PACKAGE_flamenco_worker/flamenco-worker
+ExecStart=/mnt/flamenco-resources/apps/flamenco-worker/flamenco-worker
 WorkingDirectory=$AZ_BATCH_NODE_SHARED_DIR
 User=_azbatch
 Group=_azbatchgrp
