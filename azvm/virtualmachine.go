@@ -11,11 +11,11 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/azauth"
-	"gitlab.com/blender-institute/azure-go-test/azconfig"
-	"gitlab.com/blender-institute/azure-go-test/azdebug"
-	"gitlab.com/blender-institute/azure-go-test/aznetwork"
-	"gitlab.com/blender-institute/azure-go-test/textio"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azdebug"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/aznetwork"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/textio"
 )
 
 func getVMClient(config azconfig.AZConfig) compute.VirtualMachinesClient {

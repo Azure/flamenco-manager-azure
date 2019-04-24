@@ -7,8 +7,8 @@ import (
 	"text/template"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/azconfig"
-	"gitlab.com/blender-institute/azure-go-test/aznetwork"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/aznetwork"
 )
 
 // TemplateContext contains everything necessary for rendering templates.

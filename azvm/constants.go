@@ -1,6 +1,6 @@
 package azvm
 
-import "gitlab.com/blender-institute/azure-go-test/flamenco"
+import "gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
 
 const (
 	// used by default for VM operations

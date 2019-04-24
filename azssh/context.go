@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/flamenco"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )

@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"time"
 
-	"gitlab.com/blender-institute/azure-go-test/aznetwork"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/aznetwork"
 
-	"gitlab.com/blender-institute/azure-go-test/azconfig"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
 
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/date"
-	"gitlab.com/blender-institute/azure-go-test/azauth"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
 
 	"github.com/sirupsen/logrus"
 )

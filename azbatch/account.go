@@ -7,9 +7,9 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/azauth"
-	"gitlab.com/blender-institute/azure-go-test/azconfig"
-	"gitlab.com/blender-institute/azure-go-test/textio"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/textio"
 )
 
 func getBatchAccountClient(config azconfig.AZConfig) batchARM.AccountClient {

@@ -6,11 +6,11 @@ import (
 	"net/url"
 	"strings"
 
-	"gitlab.com/blender-institute/azure-go-test/flamenco"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
 
 	"github.com/Azure/azure-storage-file-go/azfile"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/azconfig"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
 )
 
 const (

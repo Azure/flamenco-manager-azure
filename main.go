@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/azure-go-test/azbatch"
-	"gitlab.com/blender-institute/azure-go-test/azconfig"
-	"gitlab.com/blender-institute/azure-go-test/azresource"
-	"gitlab.com/blender-institute/azure-go-test/azssh"
-	"gitlab.com/blender-institute/azure-go-test/azstorage"
-	"gitlab.com/blender-institute/azure-go-test/azvm"
-	"gitlab.com/blender-institute/azure-go-test/flamenco"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azbatch"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azresource"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azssh"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azstorage"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azvm"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
 )
 
 const applicationName = "Azure Go Test"
