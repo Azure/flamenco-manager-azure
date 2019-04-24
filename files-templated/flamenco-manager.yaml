@@ -20,6 +20,8 @@ shaman:
     maxAge: 240h
 
 worker_registration_secret: "{{ .WorkerRegistrationSecret }}"
+
+worker_cleanup_max_age: 30m
 worker_cleanup_status:
 - offline
 - timeout
@@ -46,7 +48,7 @@ variables:
   shaman:
     direction: oneway
     values:
-    - audience: users
+    - audience: all
       platform: linux
       value: /mnt/flamenco-input/jobs
   render:
