@@ -20,63 +20,42 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package textio
+package azsubscription
 
 import (
-	"bufio"
 	"context"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-	"sync"
 
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions"
+	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/sirupsen/logrus"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
 )
 
-var mutex = sync.Mutex{}
-
-// ReadLine reads a line from stdin and returns it as string.
-func ReadLine(ctx context.Context, prompt string) string {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	fmt.Printf("%s: ", prompt)
-
-	textChan := make(chan string)
-	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		textChan <- scanner.Text()
-	}()
-
-	select {
-	case <-ctx.Done():
-		fmt.Println("aborted")
-		return ""
-	case text := <-textChan:
-		return strings.TrimSpace(text)
-	}
+func getSubscriptionClient() subscriptions.Client {
+	client := subscriptions.NewClient()
+	client.Authorizer = azauth.Load(azure.PublicCloud.ResourceManagerEndpoint)
+	return client
 }
 
-// ReadNonNegativeInt reads a line from stdin and returns it as int.
-func ReadNonNegativeInt(ctx context.Context, prompt string, defaultZero bool) int {
-	line := ReadLine(ctx, prompt)
+// List returns a list of subscription IDs.
+func List(ctx context.Context) []subscriptions.Subscription {
+	logrus.Info("fetching Azure subscriptions")
 
-	if line == "" {
-		if defaultZero {
-			return 0
-		}
-		logrus.Fatal("no input given, aborting")
-	}
-
-	asInt, err := strconv.Atoi(line)
+	client := getSubscriptionClient()
+	iter, err := client.ListComplete(ctx)
 	if err != nil {
-		logrus.WithError(err).Fatal("invalid integer")
-	}
-	if asInt < 0 {
-		logrus.WithField("input", asInt).Fatal("number must be non-negative integer")
+		logrus.WithError(err).Fatal("unable to list Azure subscriptions")
 	}
 
-	return asInt
+	result := []subscriptions.Subscription{}
+	for iter.NotDone() {
+		subsInfo := iter.Value()
+		result = append(result, subsInfo)
+
+		if err := iter.NextWithContext(ctx); err != nil {
+			logrus.WithError(err).Fatal("unable to iterate Azure subscriptions")
+		}
+	}
+
+	return result
 }

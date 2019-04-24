@@ -38,6 +38,7 @@ import (
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azresource"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azssh"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azstorage"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azsubscription"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azvm"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
 )
@@ -53,6 +54,8 @@ var cliArgs struct {
 	quiet   bool
 	debug   bool
 
+	subscriptionID string
+	location       string
 	resourceGroup  string
 	storageAccount string
 	batchAccount   string
@@ -63,6 +66,9 @@ func parseCliArgs() {
 	flag.BoolVar(&cliArgs.version, "version", false, "Shows the application version, then exits.")
 	flag.BoolVar(&cliArgs.quiet, "quiet", false, "Disable info-level logging (so warning/error only).")
 	flag.BoolVar(&cliArgs.debug, "debug", false, "Enable debug-level logging.")
+
+	flag.StringVar(&cliArgs.subscriptionID, "subscription", "", "Subscription ID. If not given, it will be prompted for.")
+	flag.StringVar(&cliArgs.location, "location", "", "Physical location of the Azure machines. If not given, it will be prompted for.")
 	flag.StringVar(&cliArgs.resourceGroup, "group", "", "Name of the resource group. If not given, it will be prompted for.")
 	flag.StringVar(&cliArgs.storageAccount, "sa", "", "Name of the storage account. If not given, it will be prompted for.")
 	flag.StringVar(&cliArgs.batchAccount, "ba", "", "Name of the batch account. If not given, it will be prompted for.")
@@ -124,6 +130,10 @@ func main() {
 
 	config := azconfig.Load()
 	sshContext := azssh.LoadSSHContext()
+
+	// Ask for stuff we can't create.
+	azsubscription.AskSubscriptionAndSave(ctx, &config, cliArgs.subscriptionID)
+	azsubscription.AskLocationAndSave(ctx, &config, cliArgs.location)
 
 	// Determine what to create and what to assume is there.
 	// rg = Resource Group; sa = Storage Account; ba = Batch Account

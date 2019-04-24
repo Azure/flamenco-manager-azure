@@ -25,7 +25,6 @@ package azbatch
 import (
 	"context"
 	"fmt"
-	"strconv"
 
 	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
 
@@ -55,36 +54,15 @@ func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig) {
 		logrus.Fatal("no batch pool ID given, aborting")
 	}
 
-	fmt.Printf("   for sizes, see https://docs.microsoft.com/azure/batch/batch-pool-vm-sizes")
+	fmt.Println()
+	fmt.Println("For sizes, see https://docs.microsoft.com/azure/batch/batch-pool-vm-sizes")
 	vmSize := textio.ReadLine(ctx, "Desired batch node VM size [Standard_F16s]")
 	if vmSize == "" {
 		vmSize = "Standard_F16s"
 	}
 
-	var targetDedicatedNodes, targetLowPriorityNodes int
-	var err error
-
-	targetDedicatedNodesStr := textio.ReadLine(ctx, "Target dedicated node count [0]")
-	if targetDedicatedNodesStr != "" {
-		targetDedicatedNodes, err = strconv.Atoi(targetDedicatedNodesStr)
-		if err != nil {
-			logrus.WithError(err).Fatal("invalid integer")
-		}
-		if targetDedicatedNodes < 0 {
-			logrus.WithField("targetDedicatedNodes", targetDedicatedNodes).Fatal("number of nodes must be non-negative integer")
-		}
-	}
-
-	targetLowPriorityNodesStr := textio.ReadLine(ctx, "Target low-priority node count [0]")
-	if targetLowPriorityNodesStr != "" {
-		targetLowPriorityNodes, err = strconv.Atoi(targetLowPriorityNodesStr)
-		if err != nil {
-			logrus.WithError(err).Fatal("invalid integer")
-		}
-		if targetLowPriorityNodes < 0 {
-			logrus.WithField("targetLowPriorityNodes", targetLowPriorityNodes).Fatal("number of nodes must be non-negative integer")
-		}
-	}
+	targetDedicatedNodes := textio.ReadNonNegativeInt(ctx, "Target dedicated node count [0]", true)
+	targetLowPriorityNodes := textio.ReadNonNegativeInt(ctx, "Target low-priority node count [0]", true)
 
 	config.Batch = &azconfig.AZBatchConfig{
 		PoolID:                 poolID,

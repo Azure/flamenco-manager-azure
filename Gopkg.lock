@@ -18,13 +18,14 @@
   version = "v0.1.9"
 
 [[projects]]
-  digest = "1:b54a05b2f500aaddac78015f87b483ee1b41cfcf2fc8c87e61018cbed28f31aa"
+  digest = "1:e20fd573fbd31e70aa7a14bb9c005b87e8797f2801a5473d1f7c538b7167e8d0"
   name = "github.com/Azure/azure-sdk-for-go"
   packages = [
     "services/batch/2018-12-01.8.0/batch",
     "services/batch/mgmt/2017-09-01/batch",
     "services/compute/mgmt/2018-06-01/compute",
     "services/network/mgmt/2017-09-01/network",
+    "services/resources/mgmt/2016-06-01/subscriptions",
     "services/resources/mgmt/2017-05-10/resources",
     "services/storage/mgmt/2018-07-01/storage",
     "version",
@@ -346,6 +347,7 @@
     "github.com/Azure/azure-sdk-for-go/services/batch/mgmt/2017-09-01/batch",
     "github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2018-06-01/compute",
     "github.com/Azure/azure-sdk-for-go/services/network/mgmt/2017-09-01/network",
+    "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions",
     "github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2017-05-10/resources",
     "github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2018-07-01/storage",
     "github.com/Azure/azure-storage-file-go/azfile",

@@ -20,63 +20,23 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-package textio
+package azsubscription
 
 import (
-	"bufio"
 	"context"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-	"sync"
 
+	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions"
 	"github.com/sirupsen/logrus"
 )
 
-var mutex = sync.Mutex{}
-
-// ReadLine reads a line from stdin and returns it as string.
-func ReadLine(ctx context.Context, prompt string) string {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	fmt.Printf("%s: ", prompt)
-
-	textChan := make(chan string)
-	go func() {
-		scanner := bufio.NewScanner(os.Stdin)
-		scanner.Scan()
-		textChan <- scanner.Text()
-	}()
-
-	select {
-	case <-ctx.Done():
-		fmt.Println("aborted")
-		return ""
-	case text := <-textChan:
-		return strings.TrimSpace(text)
-	}
-}
-
-// ReadNonNegativeInt reads a line from stdin and returns it as int.
-func ReadNonNegativeInt(ctx context.Context, prompt string, defaultZero bool) int {
-	line := ReadLine(ctx, prompt)
-
-	if line == "" {
-		if defaultZero {
-			return 0
-		}
-		logrus.Fatal("no input given, aborting")
-	}
-
-	asInt, err := strconv.Atoi(line)
+// ListLocations returns the Azure locations available to this subscription.
+func ListLocations(ctx context.Context, subscriptionID string) []subscriptions.Location {
+	logrus.Info("fetching list of available Azure locations")
+	client := getSubscriptionClient()
+	iter, err := client.ListLocations(ctx, subscriptionID)
 	if err != nil {
-		logrus.WithError(err).Fatal("invalid integer")
-	}
-	if asInt < 0 {
-		logrus.WithField("input", asInt).Fatal("number must be non-negative integer")
+		logrus.WithError(err).Fatal("unable to list Azure Locations")
 	}
 
-	return asInt
+	return *iter.Value
 }

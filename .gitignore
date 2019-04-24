@@ -1,5 +1,6 @@
 /vendor/
 /dist/
 /*_credentials.json
+/azure_config.yaml
 /flamenco-deploy-azure
 /flamenco-deploy-azure-v*

@@ -54,9 +54,9 @@ type AZConfig struct {
 	filename string
 
 	// ID of the Azure subscription. It is the "id" field shown by `az account list`
-	SubscriptionID string ` yaml:"subscriptionID"`
+	SubscriptionID string ` yaml:"subscriptionID,omitempty"`
 	// Physical location of the resource group, such as 'westeurope' or 'eastus'.
-	Location string ` yaml:"location"`
+	Location string ` yaml:"location,omitempty"`
 
 	// Name of the resource group that will contain the Flamenco infrastructure.
 	ResourceGroup string `yaml:"resourceGroup,omitempty"`
@@ -79,8 +79,8 @@ type AZConfig struct {
 func Load() AZConfig {
 	logger := logrus.WithField("filename", configFile)
 	paramFile, err := ioutil.ReadFile(configFile)
-	if err != nil {
-		logger.WithError(err).Fatal("unable to open Azure Batch pool parameters")
+	if err != nil && !os.IsNotExist(err) {
+		logger.WithError(err).Fatal("unable to open config file")
 	}
 
 	abspath, err := filepath.Abs(configFile)
@@ -92,13 +92,6 @@ func Load() AZConfig {
 	params.filename = abspath
 	if err := yaml.Unmarshal(paramFile, &params); err != nil {
 		logger.WithError(err).Fatal("unable to decode Azure Batch pool parameters")
-	}
-
-	if params.SubscriptionID == "" {
-		logger.Fatal("property 'subscriptionID' must be set")
-	}
-	if params.Location == "" {
-		logger.Fatal("property 'location' must be set")
 	}
 
 	if params.WorkerRegistrationSecret == "" {
@@ -154,7 +147,7 @@ func (azc AZConfig) Save() {
 		}).Fatal("unable to save configuration file")
 	}
 
-	if err := os.Remove(azc.filename); err != nil {
+	if err := os.Remove(azc.filename); err != nil && !os.IsNotExist(err) {
 		logger.WithError(err).Fatal("unable to delete old config file")
 	}
 	if err := os.Rename(tmpname, azc.filename); err != nil {
