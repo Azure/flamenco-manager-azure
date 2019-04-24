@@ -41,7 +41,7 @@ type Connection struct {
 
 // Connect connects to a machine via SSH.
 func Connect(sshContext Context, address string) Connection {
-	if strings.IndexRune(address, ':') == -1 {
+	if !strings.ContainsRune(address, ':') {
 		address = address + ":22"
 	}
 

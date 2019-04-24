@@ -75,12 +75,6 @@ func getIPClient(config azconfig.AZConfig) network.PublicIPAddressesClient {
 	return ipClient
 }
 
-func getSubnetsClient(config azconfig.AZConfig) network.SubnetsClient {
-	subnetsClient := network.NewSubnetsClient(config.SubscriptionID)
-	subnetsClient.Authorizer = azauth.Load(azure.PublicCloud.ResourceManagerEndpoint)
-	return subnetsClient
-}
-
 // CreateNetworkStack creates a virtual network, a public IP, and a NIC.
 func CreateNetworkStack(ctx context.Context, config azconfig.AZConfig, basename string) NetworkStack {
 	publicIP := createPublicIP(ctx, config, basename+"-ip", basename)

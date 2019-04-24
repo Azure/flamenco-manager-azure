@@ -197,7 +197,7 @@ func main() {
 
 	cancelCtx()
 
-	duration := time.Now().Sub(startupTime)
+	duration := time.Since(startupTime)
 	logrus.WithFields(logrus.Fields{
 		"duration": duration,
 		"url":      fmt.Sprintf("https://%s/setup", networkStack.FQDN()),

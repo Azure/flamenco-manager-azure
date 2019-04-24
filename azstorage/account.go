@@ -96,7 +96,7 @@ func CheckAvailability(ctx context.Context, config azconfig.AZConfig, accountNam
 		return
 	}
 
-	if *result.NameAvailable != true {
+	if !*result.NameAvailable {
 		logger.WithFields(logrus.Fields{
 			"serverMessage": *result.Message,
 			"reason":        result.Reason,
