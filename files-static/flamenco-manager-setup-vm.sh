@@ -173,4 +173,4 @@ echo "Starting services"
 sudo systemctl enable mongod
 sudo systemctl start mongod
 sudo systemctl enable flamenco-manager
-sudo systemctl start flamenco-manager
+sudo systemctl restart flamenco-manager
