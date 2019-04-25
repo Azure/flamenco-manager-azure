@@ -78,7 +78,7 @@ func PoolParameters(config azconfig.AZConfig, netStack aznetwork.NetworkStack) b
 	mountOpts := azstorage.GetMountOptions(config, "flamenco-resources")
 	startCmd := fmt.Sprintf("bash -exc 'sudo mkdir -p /mnt/flamenco-resources; "+
 		"sudo groupadd --force %s; "+
-		"sudo mount -t cifs //%s.file.core.windows.net/flamenco-resources /mnt/flamenco-resources -o %s; "+
+		"grep \" /mnt/flamenco-resources \" -q /proc/mounts || sudo mount -t cifs //%s.file.core.windows.net/flamenco-resources /mnt/flamenco-resources -o %s; "+
 		"bash -ex /mnt/flamenco-resources/flamenco-worker-startup.sh'",
 		flamenco.UnixGroupName,
 		config.StorageCreds.Username, mountOpts,
