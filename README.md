@@ -47,15 +47,19 @@ To get the IP address of the virtual machine without re-running the deployment a
 
     az network public-ip list --query [].ipAddress
 
-The Blender Cloud Add-on should be configured to use `shaman://{VM name}.{location}.cloudapp.azure.com/`
-as Job Storage location.
+## Blender Cloud Add-on configuration
+
+The Blender Cloud Add-on should be configured to use the following settings:
+
+- **Job Storage**: `shaman://{VM name}.{location}.cloudapp.azure.com/`. This is the same URL as the
+  Manager, except replacing `https://` with `shaman://`.
+- **Job Output**: `/mnt/flamenco-output/render`
 
 
 ## SSH Access
 
-The Flamenco Manager VM can be reached via SSH using `ssh flamencoadmin@{VM
-name}.{location}.cloudapp.azure.com`. The account's password is randomised and cannot be retrieved.
-Access is granted only using your private key.
+The Flamenco Manager VM can be reached via SSH using `ssh flamencoadmin@{VM name}.{location}.cloudapp.azure.com`.
+The account's password is randomised and cannot be retrieved. Access is granted only using your private key.
 
 
 ## Get going with this Go code
