@@ -52,7 +52,7 @@ package:
 	@$(MAKE) _prepare_package
 	@$(MAKE) _package_linux
 	# @$(MAKE) _package_windows
-	# @$(MAKE) _package_darwin
+	@$(MAKE) _package_darwin
 	@$(MAKE) _finish_package
 
 package_linux:
@@ -65,10 +65,10 @@ package_linux:
 # 	@$(MAKE) _package_windows
 # 	@$(MAKE) _finish_package
 
-# package_darwin:
-# 	@$(MAKE) _prepare_package
-# 	@$(MAKE) _package_darwin
-# 	@$(MAKE) _finish_package
+package_darwin:
+	@$(MAKE) _prepare_package
+	@$(MAKE) _package_darwin
+	@$(MAKE) _finish_package
 
 _package_linux:
 	@$(MAKE) --no-print-directory GOOS=linux MONGOOS=linux GOARCH=amd64 STATIC_OUT=${PACKAGE_PATH}/${OUT} _package_tar
@@ -76,8 +76,8 @@ _package_linux:
 # _package_windows:
 # 	@$(MAKE) --no-print-directory GOOS=windows MONGOOS=windows GOARCH=amd64 STATIC_OUT=${PACKAGE_PATH}/${OUT}.exe _package_zip
 
-# _package_darwin:
-# 	@$(MAKE) --no-print-directory GOOS=darwin MONGOOS=osx GOARCH=amd64 STATIC_OUT=${PACKAGE_PATH}/${OUT} _package_zip
+_package_darwin:
+	@$(MAKE) --no-print-directory GOOS=darwin MONGOOS=osx GOARCH=amd64 STATIC_OUT=${PACKAGE_PATH}/${OUT} _package_zip
 
 _prepare_package:
 	rm -rf ${PACKAGE_PATH}
