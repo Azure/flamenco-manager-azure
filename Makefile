@@ -14,8 +14,6 @@ all: binary
 
 devprepare:
 	go get -u honnef.co/go/tools/cmd/staticcheck
-	go get -u github.com/golang/dep/cmd/dep
-	dep ensure -vendor-only
 
 binary:
 	go build -i -v -o ${OUT} -ldflags="-X main.applicationVersion=${VERSION}" ${PKG}
