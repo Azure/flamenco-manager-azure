@@ -35,7 +35,10 @@ import (
 )
 
 // AskResourceGroupName asks for a resource group, potentially overridable by a CLI arg.
-func AskResourceGroupName(ctx context.Context, config azconfig.AZConfig, cliAccountName string) (desiredName string, mustCreate bool) {
+func AskResourceGroupName(
+	ctx context.Context, config azconfig.AZConfig,
+	cliAccountName, defaultAccountName string,
+) (desiredName string, mustCreate bool) {
 	if cliAccountName != "" {
 		logrus.WithField("resourceGroup", cliAccountName).Debug("creating resource group from CLI")
 		return cliAccountName, true
@@ -46,7 +49,7 @@ func AskResourceGroupName(ctx context.Context, config azconfig.AZConfig, cliAcco
 		return config.ResourceGroup, false
 	}
 
-	desiredName = textio.ReadLine(ctx, "Desired resource group")
+	desiredName = textio.ReadLineWithDefault(ctx, "Desired resource group", defaultAccountName)
 	if desiredName == "" {
 		logrus.Fatal("no resource group given, aborting")
 	}

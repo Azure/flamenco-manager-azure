@@ -43,7 +43,10 @@ func getAccountClient(config azconfig.AZConfig) storage.AccountsClient {
 }
 
 // AskAccountName asks for a storage account name, potentially overridable by a CLI arg.
-func AskAccountName(ctx context.Context, config azconfig.AZConfig, cliAccountName string) (desiredName string, mustCreate bool) {
+func AskAccountName(
+	ctx context.Context, config azconfig.AZConfig,
+	cliAccountName, defaultAccountName string,
+) (desiredName string, mustCreate bool) {
 	if cliAccountName != "" {
 		logrus.WithField("storageAccountName", cliAccountName).Debug("creating storage account from CLI")
 		return cliAccountName, true
@@ -54,7 +57,7 @@ func AskAccountName(ctx context.Context, config azconfig.AZConfig, cliAccountNam
 		return config.StorageAccountName, false
 	}
 
-	desiredName = textio.ReadLine(ctx, "Desired storage account name")
+	desiredName = textio.ReadLineWithDefault(ctx, "Desired storage account name", defaultAccountName)
 	if desiredName == "" {
 		logrus.Fatal("no storage account name given, aborting")
 	}

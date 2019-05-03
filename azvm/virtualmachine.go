@@ -86,7 +86,7 @@ func ListVMs(ctx context.Context, config azconfig.AZConfig) []string {
 
 // ChooseVM lets the user pick a virtual machine.
 // if vmName is not empty, that name is used instead, and this function just determines whether that VM already exists.
-func ChooseVM(ctx context.Context, config *azconfig.AZConfig, vmName string) (chosenVMName string, isExisting bool) {
+func ChooseVM(ctx context.Context, config *azconfig.AZConfig, vmName, defaultName string) (chosenVMName string, isExisting bool) {
 	vmNames := ListVMs(ctx, *config)
 	vmChoices := textio.StrMap(vmNames)
 
@@ -112,7 +112,7 @@ func ChooseVM(ctx context.Context, config *azconfig.AZConfig, vmName string) (ch
 	if len(vmNames) > 0 {
 		vmName, isExisting = textio.Choose(ctx, vmNames, "Desired VM name, can be new or an existing name")
 	} else {
-		vmName = textio.ReadLine(ctx, "Desired name for new VM")
+		vmName = textio.ReadLineWithDefault(ctx, "Desired name for new VM", defaultName)
 	}
 	if vmName == "" {
 		logger.Fatal("no name given, aborting")

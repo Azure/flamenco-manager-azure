@@ -38,7 +38,7 @@ import (
 )
 
 // AskParametersAndSave asks the user for the batch pool parameters and saves them in the config.
-func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig) {
+func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig, defaultPoolName string) {
 	if config.Batch != nil && config.Batch.PoolID != "" && config.Batch.VMSize != "" {
 		logrus.WithFields(logrus.Fields{
 			"poolID":                 config.Batch.PoolID,
@@ -49,7 +49,7 @@ func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig) {
 		return
 	}
 
-	poolID := textio.ReadLine(ctx, "Desired batch pool ID")
+	poolID := textio.ReadLineWithDefault(ctx, "Desired batch pool ID", defaultPoolName)
 	if poolID == "" {
 		logrus.Fatal("no batch pool ID given, aborting")
 	}

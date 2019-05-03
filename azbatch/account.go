@@ -43,7 +43,10 @@ func getBatchAccountClient(config azconfig.AZConfig) batchARM.AccountClient {
 }
 
 // AskAccountName asks for a batch account name, potentially overridable by a CLI arg.
-func AskAccountName(ctx context.Context, config azconfig.AZConfig, cliAccountName string) (desiredName string, mustCreate bool) {
+func AskAccountName(
+	ctx context.Context, config azconfig.AZConfig,
+	cliAccountName, defaultAccountName string,
+) (desiredName string, mustCreate bool) {
 	if cliAccountName != "" {
 		logrus.WithField("batchAccountName", cliAccountName).Debug("creating batch account from CLI")
 		return cliAccountName, true
@@ -54,7 +57,7 @@ func AskAccountName(ctx context.Context, config azconfig.AZConfig, cliAccountNam
 		return config.BatchAccountName, false
 	}
 
-	desiredName = textio.ReadLine(ctx, "Desired batch account name")
+	desiredName = textio.ReadLineWithDefault(ctx, "Desired batch account name", defaultAccountName)
 	if desiredName == "" {
 		logrus.Fatal("no batch account name given, aborting")
 	}

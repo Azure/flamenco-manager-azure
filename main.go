@@ -41,6 +41,7 @@ import (
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azsubscription"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azvm"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/textio"
 )
 
 const applicationName = "Azure Go Test"
@@ -135,19 +136,25 @@ func main() {
 	azsubscription.AskSubscriptionAndSave(ctx, &config, cliArgs.subscriptionID)
 	azsubscription.AskLocationAndSave(ctx, &config, cliArgs.location)
 
+	// Ask for the default name for the subsequent prompts.
+	if config.DefaultName == "" {
+		config.DefaultName = textio.ReadLineWithDefault(ctx, "Default name for subcomponents", config.DefaultName)
+		config.Save()
+	}
+
 	// Determine what to create and what to assume is there.
 	// rg = Resource Group; sa = Storage Account; ba = Batch Account
-	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup)
+	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup, config.DefaultName)
 	if createRG {
 		azresource.EnsureResourceGroup(ctx, &config, rgName)
 	}
-	azbatch.AskParametersAndSave(ctx, &config)
-	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount)
+	azbatch.AskParametersAndSave(ctx, &config, config.DefaultName)
+	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
 	if createSA && !azstorage.CheckAvailability(ctx, config, saName) {
 		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
 	}
-	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount)
-	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName)
+	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
+	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName, config.DefaultName)
 
 	// Create & update stuff.
 	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)

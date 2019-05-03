@@ -53,6 +53,9 @@ type AZConfig struct {
 	// File this config was read from, so it can be saved after modification.
 	filename string
 
+	// DefaultName is presented as the default choice when asking for names.
+	DefaultName string `yaml:"defaultName,omitempty"`
+
 	// ID of the Azure subscription. It is the "id" field shown by `az account list`
 	SubscriptionID string ` yaml:"subscriptionID,omitempty"`
 	// Physical location of the resource group, such as 'westeurope' or 'eastus'.

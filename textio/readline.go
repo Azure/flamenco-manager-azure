@@ -38,6 +38,27 @@ var mutex = sync.Mutex{}
 
 // ReadLine reads a line from stdin and returns it as string.
 func ReadLine(ctx context.Context, prompt string) string {
+	line, _ := readline(ctx, prompt)
+	return line
+}
+
+// ReadLineWithDefault acts as ReadLine() but returns a default value when the user presses enter.
+func ReadLineWithDefault(ctx context.Context, prompt, defaultValue string) string {
+	if defaultValue == "" {
+		return ReadLine(ctx, prompt)
+	}
+
+	line, ok := readline(ctx, fmt.Sprintf("%s [%s]", prompt, defaultValue))
+	if !ok {
+		return ""
+	}
+	if line == "" {
+		return defaultValue
+	}
+	return line
+}
+
+func readline(ctx context.Context, prompt string) (string, bool) {
 	mutex.Lock()
 	defer mutex.Unlock()
 
@@ -53,9 +74,9 @@ func ReadLine(ctx context.Context, prompt string) string {
 	select {
 	case <-ctx.Done():
 		fmt.Println("aborted")
-		return ""
+		return "", false
 	case text := <-textChan:
-		return strings.TrimSpace(text)
+		return strings.TrimSpace(text), true
 	}
 }
 
