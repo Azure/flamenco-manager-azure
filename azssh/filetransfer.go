@@ -30,22 +30,28 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// UploadStaticFile reads a local file from 'files-static' and sends it to the server via SSH.
+// WARNING: the given filename must be a simple name, no spaces, no directory, no need for shell escaping.
+func (c *Connection) UploadStaticFile(filename string) {
+	c.UploadLocalFile(path.Join("files-static", filename))
+}
+
 // UploadLocalFile reads a local file and sends it to the server via SSH.
 // WARNING: the given filename must be a simple name, no spaces, no directory, no need for shell escaping.
 func (c *Connection) UploadLocalFile(filename string) {
-	logger := c.logger.WithField("fileName", filename)
+	logger := c.logger.WithField("filename", filename)
 
-	contents, err := ioutil.ReadFile(path.Join("files-static", filename))
+	contents, err := ioutil.ReadFile(filename)
 	if err != nil {
 		logger.WithError(err).Fatal("unable to read file")
 	}
-	c.UploadAsFile(contents, filename)
+	c.UploadAsFile(contents, path.Base(filename))
 }
 
 // UploadAsFile sends bytes to the SSH server and stores them in a file.
 // WARNING: the given filename must be a simple name, no spaces, no directory, no need for shell escaping.
 func (c *Connection) UploadAsFile(content []byte, filename string) {
-	logger := c.logger.WithField("fileName", filename)
+	logger := c.logger.WithField("filename", filename)
 
 	session, err := c.client.NewSession()
 	if err != nil {

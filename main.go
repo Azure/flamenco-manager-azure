@@ -192,11 +192,12 @@ func main() {
 	// Reconnect to ensure the admin user is part of the flamenco group.
 	ssh = azssh.Connect(sshContext, publicIP)
 	ssh.UploadAsFile([]byte(fstab), "fstab-smb")
-	ssh.UploadLocalFile("flamenco-manager.service")
+	ssh.UploadStaticFile("flamenco-manager.service")
 	ssh.UploadAsFile(flamanYAML, "default-flamenco-manager.yaml")
 	ssh.UploadAsFile(flaworkCfg, "flamenco-worker.cfg")
 	ssh.UploadAsFile(flaworkStart, "flamenco-worker-startup.sh")
-	ssh.UploadLocalFile(flamenco.InstallScriptName)
+	ssh.UploadStaticFile(flamenco.InstallScriptName)
+	ssh.UploadLocalFile("client_credentials.json")
 	ssh.RunInstallScript()
 	ssh.Close()
 

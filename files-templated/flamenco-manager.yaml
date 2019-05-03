@@ -66,3 +66,8 @@ variables:
     - audience: workers
       platform: linux
       value: /mnt/flamenco-output/render
+
+dynamic_pool_platforms:
+  azure:
+    location: {{ .AzureLocation }}
+    batch_account_name: {{ .BatchAccountName }}

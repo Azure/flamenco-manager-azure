@@ -2,7 +2,7 @@
 
 set -e
 
-FMANAGER_VERSION="2.4.3-13-g6f458d1"
+FMANAGER_VERSION="2.4.3-88-ga66f7a0"
 FWORKER_VERSION="2.3"
 FFMPEG_VERSION="4.1.3"
 AZURE_PREEMPT_MONITOR_VERSION="1.0-11-g6bf8b09"
@@ -160,6 +160,11 @@ if [ ! -e flamenco-manager.yaml ]; then
     sudo -u $FM_USER cp $MY_DIR/default-flamenco-manager.yaml flamenco-manager.yaml
 else
     echo "flamenco-manager.yaml already exists, not touching"
+fi
+if [ -e $MY_DIR/client_credentials.json ]; then
+    sudo -u $FM_USER cp $MY_DIR/client_credentials.json azure_credentials.json
+    sudo -u $FM_USER chmod 600 azure_credentials.json
+    rm $MY_DIR/client_credentials.json
 fi
 
 # Configure Flamenco Worker

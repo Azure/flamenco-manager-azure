@@ -41,6 +41,9 @@ type TemplateContext struct {
 	WorkerRegistrationSecret string
 	FSTabForStorage          string
 	UnixGroupName            string
+
+	AzureLocation    string
+	BatchAccountName string
 }
 
 // NewTemplateContext constructs a new context for rendering templated config files.
@@ -56,6 +59,8 @@ func NewTemplateContext(
 		WorkerRegistrationSecret: config.WorkerRegistrationSecret,
 		FSTabForStorage:          fstab,
 		UnixGroupName:            UnixGroupName,
+		AzureLocation:            config.Location,
+		BatchAccountName:         config.BatchAccountName,
 	}
 	return ctx
 }
