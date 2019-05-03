@@ -65,7 +65,7 @@ EOT
 sudo cp fstab-new /etc/fstab
 sudo mkdir -p $(awk '{ print $2 }' < fstab-smb)
 # Mount all SMB mountpoints, except 'flamenco-resources' -- it's already mounted by the startup task.
-awk '{ print $2 }' < fstab-smb | grep -v flamenco-resources | sudo xargs -n1 mount
+mount -a
 
 echo === Installing Azure Preempt Monitor service ===
 systemctl stop azure-preempt-monitor.service || true
