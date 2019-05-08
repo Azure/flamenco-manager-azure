@@ -71,3 +71,6 @@ dynamic_pool_platforms:
   azure:
     location: {{ .AzureLocation }}
     batch_account_name: {{ .BatchAccountName }}
+
+websetup:
+  hide_infra_settings: true
