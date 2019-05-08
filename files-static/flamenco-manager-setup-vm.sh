@@ -82,7 +82,7 @@ mkdir -p $HOME/flamenco-components
 cd $HOME/flamenco-components
 COMPONENTS_DIR=$(pwd)
 
-wget -qN \
+wget -N \
     https://www.flamenco.io/download/flamenco-manager-${FMANAGER_VERSION}-linux.tar.gz \
     https://www.flamenco.io/download/flamenco-worker-${FWORKER_VERSION}-linux.tar.gz \
     https://flamenco.io/download/azure-preempt-monitor/azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION}-linux.tar.gz \
