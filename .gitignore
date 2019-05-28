@@ -1,7 +1,7 @@
 /vendor/
 /dist/
 /*_credentials.json
-/azure_config.yaml
+/flamenco_azure_deploy.yaml
 /flamenco-deploy-azure
 /flamenco-deploy-azure-v*
 /.gitlabAccessToken

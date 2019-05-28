@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	configFile = "azure_config.yaml"
+	configFile = "flamenco_azure_deploy.yaml"
 )
 
 // AZBatchConfig has all the batch parameters.
@@ -48,7 +48,7 @@ type AZBatchConfig struct {
 	TargetLowPriorityNodes int32 `yaml:"targetLowPriorityNodes"`
 }
 
-// AZConfig is loaded from azure_config.yaml
+// AZConfig is loaded from 'configFile'
 type AZConfig struct {
 	// File this config was read from, so it can be saved after modification.
 	filename string
