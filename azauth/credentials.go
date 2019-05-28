@@ -56,7 +56,7 @@ func EnsureCredentialsFile(ctx context.Context) {
 	cliArgs := []string{"az", "ad", "sp", "create-for-rbac", "--sdk-auth"}
 	logger = logger.WithField("cliArgs", strings.Join(cliArgs, " "))
 
-	cmd := exec.Command(cliArgs[0], cliArgs[1:]...)
+	cmd := exec.CommandContext(ctx, cliArgs[0], cliArgs[1:]...)
 	outpipe, err := cmd.StdoutPipe()
 	if err != nil {
 		logger.WithError(err).Fatal("unable to create stdout pipe for AZ CLI command")
