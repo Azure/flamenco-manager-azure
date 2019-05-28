@@ -69,6 +69,18 @@ Run:
     make
     ./flamenco-deploy-azure -help
 
+## Publishing a new release
+
+Run:
+
+    git tag v1.1  # replace with the release version
+    git push --tags
+    make release
+
+If you get an error "Ref is not specified" from Gitlab, you aren't building exactly the same tag as
+is available on Gitlab (so either your working directory is in a different Git revision, or you
+didn't push the tag you're trying to build).
+
 
 ## Some more technical details
 
