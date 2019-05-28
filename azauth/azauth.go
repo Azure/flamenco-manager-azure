@@ -35,7 +35,7 @@ import (
 func Load(url string) autorest.Authorizer {
 	fileloc := os.Getenv("AZURE_AUTH_LOCATION")
 	if fileloc == "" {
-		fileloc = "client_credentials.json"
+		fileloc = CredentialsFile
 		err := os.Setenv("AZURE_AUTH_LOCATION", fileloc)
 		if err != nil {
 			logrus.WithError(err).Fatal("unable to set AZURE_AUTH_LOCATION environment variable")

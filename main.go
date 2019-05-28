@@ -33,6 +33,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
+	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azbatch"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
 	"gitlab.com/blender-institute/flamenco-deploy-azure/azresource"
@@ -132,6 +133,9 @@ func main() {
 	config := azconfig.Load()
 	sshContext := azssh.LoadSSHContext()
 
+	// Get the Azure credentials into the right file.
+	azauth.EnsureCredentialsFile(ctx)
+
 	// Ask for stuff we can't create.
 	azsubscription.AskSubscriptionAndSave(ctx, &config, cliArgs.subscriptionID)
 	azsubscription.AskLocationAndSave(ctx, &config, cliArgs.location)
@@ -197,7 +201,7 @@ func main() {
 	ssh.UploadAsFile(flaworkCfg, "flamenco-worker.cfg")
 	ssh.UploadAsFile(flaworkStart, "flamenco-worker-startup.sh")
 	ssh.UploadStaticFile(flamenco.InstallScriptName)
-	ssh.UploadLocalFile("client_credentials.json")
+	ssh.UploadLocalFile(azauth.CredentialsFile)
 	ssh.RunInstallScript()
 	ssh.Close()
 

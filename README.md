@@ -7,8 +7,6 @@ Flamenco Manager + Workers can now be easily deployed on Microsoft Azure.
 - Install [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest)
   and [Azure Batch Explorer](https://azure.github.io/BatchExplorer/).
 - Run `az login` and log in via your browser.
-- Run `az ad sp create-for-rbac --sdk-auth > client_credentials.json`. Don't be afraid of the
-  'Retrying role assignment creation' message, it's expected.
 - Make sure you have an SSH keypair available. The private key should be loaded into the SSH Agent
   (run `ssh-add -L` to check) or it should be an unencrypted key available in `$HOME/.ssh/id_rsa`.
   The public key is read from `$HOME/.ssh/id_rsa.pub`.
@@ -68,7 +66,6 @@ The account's password is randomised and cannot be retrieved. Access is granted 
 Run:
 
     az login
-    az ad sp create-for-rbac --sdk-auth > client_credentials.json
     make
     ./flamenco-deploy-azure -help
 
