@@ -107,6 +107,6 @@ publish_online: package
 	$(error gitlabAccessToken does not exist, visit Visit https://gitlab.com/profile/personal_access_tokens, create a Personal Access Token with API access then save it to the file .gitlabAccessToken)
 
 release: .gitlabAccessToken publish_online
-	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}*
+	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}\*
 
 .PHONY: run binary version static vet lint package package_linux
