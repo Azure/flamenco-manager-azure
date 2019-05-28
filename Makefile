@@ -5,6 +5,10 @@ PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 STATIC_OUT := ${OUT}-v${VERSION}
 PACKAGE_PATH := dist/${OUT}-${VERSION}
 
+SSH := ssh -o ClearAllForwardings=yes
+PUBLISH_TO := armadillica@flamenco.io:flamenco.io/download/azure/
+
+
 ifndef PACKAGE_PATH
 # ${PACKAGE_PATH} is used in 'rm' commands, so it's important to check.
 $(error PACKAGE_PATH is not set)
@@ -94,5 +98,17 @@ _package_tar: static
 _package_zip: static
 	cd $(dir ${PACKAGE_PATH}) && zip -9 -r -q $(notdir ${PACKAGE_PATH})-${GOOS}.zip $(notdir ${PACKAGE_PATH})
 	rm ${STATIC_OUT}
+
+
+publish_online: package
+	rsync ${PACKAGE_PATH}\* ${PUBLISH_TO} -va
+
+.gitlabAccessToken:
+	$(error gitlabAccessToken does not exist, visit Visit https://gitlab.com/profile/personal_access_tokens, create a Personal Access Token with API access then save it to the file .gitlabAccessToken)
+
+release: .gitlabAccessToken publish_online
+	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}\* \
+		-gitlabURL "https://gitlab.com/api/v4/projects/blender-institute%2Fflamenco-deploy-azure/releases"
+
 
 .PHONY: run binary version static vet lint package package_linux
