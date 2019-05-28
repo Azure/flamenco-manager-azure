@@ -84,7 +84,7 @@ _package_darwin:
 _prepare_package:
 	rm -rf ${PACKAGE_PATH}
 	mkdir -p ${PACKAGE_PATH}
-	cp -ua README.md LICENSE.txt files-templated files-static ${PACKAGE_PATH}/
+	rsync -ua README.md LICENSE.txt files-templated files-static ${PACKAGE_PATH}/
 
 _finish_package:
 	rm -r ${PACKAGE_PATH}
