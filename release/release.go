@@ -17,6 +17,12 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+const (
+	appName     = "Flamenco Azure Deploy"
+	downloadURL = "https://flamenco.io/download/azure/" // MUST end in slash
+	gitlabURL   = "https://gitlab.com/api/v4/projects/blender-institute%2Fflamenco-deploy-azure/releases"
+)
+
 type gitlabRelease struct {
 	Name        string `json:"name"`
 	TagName     string `json:"tag_name"`
@@ -32,9 +38,8 @@ type gitlabLink struct {
 }
 
 var cliArgs struct {
-	version   string
-	fileglob  string
-	gitlabURL string
+	version  string
+	fileglob string
 }
 
 func main() {
@@ -66,7 +71,7 @@ func makeRequestPayload() []byte {
 	release := gitlabRelease{
 		Name:        cliArgs.version,
 		TagName:     cliArgs.version,
-		Description: fmt.Sprintf("Version %s of Azure Preempt Monitor", cliArgs.version),
+		Description: fmt.Sprintf("Version %s of %s", cliArgs.version, appName),
 	}
 
 	paths, err := filepath.Glob(cliArgs.fileglob)
@@ -84,7 +89,7 @@ func makeRequestPayload() []byte {
 		logrus.WithField("filename", fname).Info("listing")
 		link := gitlabLink{
 			Name: fname,
-			URL:  "https://flamenco.io/download/azure-preempt-monitor/" + fname,
+			URL:  downloadURL + fname,
 		}
 		release.Assets.Links = append(release.Assets.Links, link)
 	}
@@ -120,8 +125,8 @@ func doGitlabRequest(payload []byte, authToken string) {
 		Timeout: 1 * time.Minute,
 	}
 
-	logger := logrus.WithField("url", cliArgs.gitlabURL)
-	req, err := http.NewRequest("POST", cliArgs.gitlabURL, bytes.NewReader(payload))
+	logger := logrus.WithField("url", gitlabURL)
+	req, err := http.NewRequest("POST", gitlabURL, bytes.NewReader(payload))
 	if err != nil {
 		logger.WithError(err).Fatal("unable to create HTTP request")
 	}

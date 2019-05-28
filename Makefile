@@ -101,14 +101,12 @@ _package_zip: static
 
 
 publish_online: package
-	rsync ${PACKAGE_PATH}\* ${PUBLISH_TO} -va
+	rsync ${PACKAGE_PATH}* ${PUBLISH_TO} -va
 
 .gitlabAccessToken:
 	$(error gitlabAccessToken does not exist, visit Visit https://gitlab.com/profile/personal_access_tokens, create a Personal Access Token with API access then save it to the file .gitlabAccessToken)
 
 release: .gitlabAccessToken publish_online
-	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}\* \
-		-gitlabURL "https://gitlab.com/api/v4/projects/blender-institute%2Fflamenco-deploy-azure/releases"
-
+	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}*
 
 .PHONY: run binary version static vet lint package package_linux
