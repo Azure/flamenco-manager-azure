@@ -69,8 +69,7 @@ Run:
 
     az login
     az ad sp create-for-rbac --sdk-auth > client_credentials.json
-    make devprepare
-    make install
+    make
     ./flamenco-deploy-azure -help
 
 
