@@ -135,7 +135,7 @@ func createFileShare(ctx context.Context, serviceURL azfile.ServiceURL, shareNam
 	if err != nil {
 		storageErr, ok := err.(azfile.StorageError)
 		if !ok {
-			logger.WithError(err).Fatalf("unable to create SMB share")
+			logger.WithError(err).Fatal("unable to create SMB share")
 		}
 		if storageErr.ServiceCode() == statusShareAlreadyExists {
 			logger.Debug("SMB share already exists")
