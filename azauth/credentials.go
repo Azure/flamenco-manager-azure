@@ -25,6 +25,7 @@ package azauth
 import (
 	"context"
 	"io"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"strings"
@@ -40,12 +41,12 @@ const (
 // EnsureCredentialsFile creates the credentials file using the AZ CLI client if it doesn't exist yet.
 func EnsureCredentialsFile(ctx context.Context) {
 	logger := logrus.WithField("credentialsFile", CredentialsFile)
-	if _, err := os.Stat(CredentialsFile); err == nil {
+	if credStat, err := os.Stat(CredentialsFile); err == nil && credStat.Size() > 0 {
 		logger.Debug("credentials file exists")
 		return
 	}
 
-	logger.Info("credentials file does not exist, creating it")
+	logger.Info("creating credentials file")
 
 	credFile, err := os.Create(CredentialsFile)
 	if err != nil {
@@ -57,19 +58,37 @@ func EnsureCredentialsFile(ctx context.Context) {
 	logger = logger.WithField("cliArgs", strings.Join(cliArgs, " "))
 
 	cmd := exec.CommandContext(ctx, cliArgs[0], cliArgs[1:]...)
+
+	// Capture stdout
 	outpipe, err := cmd.StdoutPipe()
 	if err != nil {
 		logger.WithError(err).Fatal("unable to create stdout pipe for AZ CLI command")
 	}
+	go io.Copy(credFile, outpipe)
+
+	// Capture stderr
+	errpipe, err := cmd.StderrPipe()
+	if err != nil {
+		logger.WithError(err).Fatal("unable to create stderr pipe for AZ CLI command")
+	}
+	var stderrBytes []byte
+	go func() { stderrBytes, _ = ioutil.ReadAll(errpipe) }()
+
+	// Run the command and wait for it to complete.
 	if err := cmd.Start(); err != nil {
 		logger.WithError(err).Fatal("unable to run AZ CLI command")
 	}
-
-	// I hope the CLI command closes its stdout before we wait() for it.
-	io.Copy(credFile, outpipe)
-
 	if err := cmd.Wait(); err != nil {
-		logger.WithError(err).Fatal("error running AZ CLI command")
+		stderr := string(stderrBytes)
+
+		if strings.Contains(stderr, "'az login'") {
+			logger.WithError(err).Warn("error running AZ CLI command")
+			logrus.Fatal("run 'az login' before starting Flamenco Azure Deploy")
+		}
+		logger.WithFields(logrus.Fields{
+			"stderr":        stderr,
+			logrus.ErrorKey: err,
+		}).Fatal("error running AZ CLI command")
 	}
 
 	// Now the credentials file exists, and our job is done.
