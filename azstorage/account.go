@@ -127,8 +127,8 @@ func CreateAccount(ctx context.Context, config azconfig.AZConfig, accountName st
 		accountName,
 		storage.AccountCreateParameters{
 			Sku: &storage.Sku{
-				Name: storage.StandardLRS},
-			Kind:                              storage.Storage,
+				Name: storage.PremiumLRS},
+			Kind:                              storage.FileStorage,
 			Location:                          to.StringPtr(config.Location),
 			AccountPropertiesCreateParameters: &storage.AccountPropertiesCreateParameters{},
 		})
