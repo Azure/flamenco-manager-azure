@@ -88,14 +88,9 @@ func CreateAccount(ctx context.Context, config azconfig.AZConfig, accountName st
 	})
 	logger.Info("creating batch account")
 
-	storageAccountID := config.StorageAccountID()
 	params := batchARM.AccountCreateParameters{
 		Location: to.StringPtr(config.Location),
-		AccountCreateProperties: &batchARM.AccountCreateProperties{
-			AutoStorage: &batchARM.AutoStorageBaseProperties{
-				StorageAccountID: &storageAccountID,
-			},
-		},
+		AccountCreateProperties: &batchARM.AccountCreateProperties{},
 	}
 	res, err := accountClient.Create(ctx, config.ResourceGroup, accountName, params)
 	if err != nil {
