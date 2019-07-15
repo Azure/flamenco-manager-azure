@@ -104,4 +104,4 @@ document is a nice place to start reading about Azure Batch. This document is al
 - `/var/lib/waagent` contains info from the Azure Agent, like the assigned
   hostname, configuration settings, TLS certificates, etc.
 - If the pool is configured to run the startup task as `NonAdmin`, it uses
-  uid=1001(_azbatchtask_start) gid=1000(_azbatchgrp) groups=1000(_azbatchgrp).
+  `uid=1001(_azbatchtask_start) gid=1000(_azbatchgrp) groups=1000(_azbatchgrp)`.
