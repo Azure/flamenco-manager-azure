@@ -106,7 +106,7 @@ publish_online: package
 .githubAccessToken:
 	$(error githubAccessToken does not exist, visit Visit https://github.com/settings/tokens, create a Personal Access Token with API access then save it to the file .githubAccessToken)
 
-release: .githubAccessToken
+release: .githubAccessToken package
 	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}\*
 
 .PHONY: run binary version static vet lint package package_linux
