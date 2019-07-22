@@ -24,7 +24,7 @@ package azssh
 
 import (
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
+	"github.com/Azure/flamenco-manager-azure/flamenco"
 )
 
 // SetupUsers sets up the users and groups on Flamenco Manager.

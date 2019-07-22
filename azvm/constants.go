@@ -22,7 +22,7 @@
 
 package azvm
 
-import "gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
+import "github.com/Azure/flamenco-manager-azure/flamenco"
 
 const (
 	// used by default for VM operations

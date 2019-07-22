@@ -29,7 +29,7 @@ import (
 	"time"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
+	"github.com/Azure/flamenco-manager-azure/flamenco"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/agent"
 )

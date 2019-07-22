@@ -27,8 +27,8 @@ import (
 	"fmt"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/textio"
+	"github.com/Azure/flamenco-manager-azure/azconfig"
+	"github.com/Azure/flamenco-manager-azure/textio"
 )
 
 // AskSubscriptionAndSave asks the user for the subscription ID and saves it in the config.

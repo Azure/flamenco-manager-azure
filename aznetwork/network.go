@@ -30,8 +30,8 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
+	"github.com/Azure/flamenco-manager-azure/azauth"
+	"github.com/Azure/flamenco-manager-azure/azconfig"
 )
 
 // NetworkStack contains all the network info we need.

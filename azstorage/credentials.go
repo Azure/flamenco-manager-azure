@@ -26,7 +26,7 @@ import (
 	"context"
 
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
+	"github.com/Azure/flamenco-manager-azure/azconfig"
 )
 
 // GetCredentials obtains the credentials to mount shares from the storage account.

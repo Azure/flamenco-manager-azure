@@ -1,4 +1,4 @@
-module gitlab.com/blender-institute/flamenco-deploy-azure
+module github.com/Azure/flamenco-manager-azure
 
 go 1.12
 

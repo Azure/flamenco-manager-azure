@@ -1,5 +1,5 @@
 OUT := flamenco-deploy-azure
-PKG := gitlab.com/blender-institute/flamenco-deploy-azure
+PKG := github.com/Azure/flamenco-manager-azure
 VERSION := $(shell git describe --tags --dirty --always)
 PKG_LIST := $(shell go list ${PKG}/... | grep -v /vendor/)
 STATIC_OUT := ${OUT}-v${VERSION}

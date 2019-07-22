@@ -26,15 +26,15 @@ import (
 	"context"
 	"fmt"
 
-	"gitlab.com/blender-institute/flamenco-deploy-azure/flamenco"
+	"github.com/Azure/flamenco-manager-azure/flamenco"
 
 	"github.com/Azure/azure-sdk-for-go/services/batch/2018-12-01.8.0/batch"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/aznetwork"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azstorage"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/textio"
+	"github.com/Azure/flamenco-manager-azure/azconfig"
+	"github.com/Azure/flamenco-manager-azure/aznetwork"
+	"github.com/Azure/flamenco-manager-azure/azstorage"
+	"github.com/Azure/flamenco-manager-azure/textio"
 )
 
 // AskParametersAndSave asks the user for the batch pool parameters and saves them in the config.

@@ -28,7 +28,7 @@ import (
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-06-01/subscriptions"
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
+	"github.com/Azure/flamenco-manager-azure/azauth"
 )
 
 func getSubscriptionClient() subscriptions.Client {

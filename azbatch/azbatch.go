@@ -31,9 +31,9 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure"
 	"github.com/Azure/go-autorest/autorest/date"
 	"github.com/sirupsen/logrus"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azauth"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/azconfig"
-	"gitlab.com/blender-institute/flamenco-deploy-azure/aznetwork"
+	"github.com/Azure/flamenco-manager-azure/azauth"
+	"github.com/Azure/flamenco-manager-azure/azconfig"
+	"github.com/Azure/flamenco-manager-azure/aznetwork"
 )
 
 func getPoolClient(batchURL string) batch.PoolClient {
