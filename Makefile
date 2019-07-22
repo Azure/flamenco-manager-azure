@@ -84,7 +84,7 @@ _package_darwin:
 _prepare_package:
 	rm -rf ${PACKAGE_PATH}
 	mkdir -p ${PACKAGE_PATH}
-	rsync -ua README.md LICENSE.txt files-templated files-static ${PACKAGE_PATH}/
+	rsync -ua README.md LICENSE files-templated files-static ${PACKAGE_PATH}/
 
 _finish_package:
 	rm -r ${PACKAGE_PATH}
@@ -103,10 +103,10 @@ _package_zip: static
 publish_online: package
 	rsync ${PACKAGE_PATH}* ${PUBLISH_TO} -va
 
-.gitlabAccessToken:
-	$(error gitlabAccessToken does not exist, visit Visit https://gitlab.com/profile/personal_access_tokens, create a Personal Access Token with API access then save it to the file .gitlabAccessToken)
+.githubAccessToken:
+	$(error githubAccessToken does not exist, visit Visit https://github.com/settings/tokens, create a Personal Access Token with API access then save it to the file .githubAccessToken)
 
-release: .gitlabAccessToken publish_online
+release: .githubAccessToken
 	go run release/release.go -version ${VERSION} -fileglob ${PACKAGE_PATH}\*
 
 .PHONY: run binary version static vet lint package package_linux

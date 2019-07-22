@@ -71,8 +71,8 @@ Run:
 
 ## Publishing a new release
 
-Before creating a release, [create a Personal Access Token](https://gitlab.com/profile/personal_access_tokens)
-with API access, then save it to the file `.gitlabAccessToken`.
+Before creating a release, [create a Personal Access Token](https://github.com/settings/tokens)
+with API access, then save it to the file `.GitHubAccessToken`.
 
 Run:
 
