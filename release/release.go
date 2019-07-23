@@ -18,9 +18,8 @@ import (
 )
 
 const (
-	appName = "Flamenco Manager Azure"
-	// githubURL = "https://api.github.com/repos/Azure/flamenco-manager-azure/releases"
-	githubURL = "https://api.github.com/repos/sybrenstuvel/privateproject/releases"
+	appName   = "Flamenco Manager Azure"
+	githubURL = "https://api.github.com/repos/Azure/flamenco-manager-azure/releases"
 )
 
 type githubRelease struct {
