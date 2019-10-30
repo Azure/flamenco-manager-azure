@@ -4,7 +4,7 @@ set -e
 
 FMANAGER_VERSION="2.5.1"
 FWORKER_VERSION="2.3.1"
-FFMPEG_VERSION="4.1.3"
+FFMPEG_VERSION="4.1.4"
 AZURE_PREEMPT_MONITOR_VERSION="1.1"
 
 BLENDER_TAR_BZ2=$(curl -s https://builder.blender.org/download/ | grep -oE "(blender-2\.81-[a-z0-9]+-linux-glibc[0-9]+-x86_64\.tar\.bz2)")
@@ -87,7 +87,7 @@ wget -N \
     https://www.flamenco.io/download/flamenco-worker-${FWORKER_VERSION}-linux.tar.gz \
     https://flamenco.io/download/azure-preempt-monitor/azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION}-linux.tar.gz \
     https://builder.blender.org/download/${BLENDER_TAR_BZ2} \
-    https://johnvansickle.com/ffmpeg/releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz
+    https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz
 
 
 echo "Installing Components"
