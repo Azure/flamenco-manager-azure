@@ -59,16 +59,21 @@ func AskResourceGroupName(
 
 // EnsureResourceGroup creates a resource group and saves it to the config.
 // The program is aborted when creation is required but fails.
-func EnsureResourceGroup(ctx context.Context, config *azconfig.AZConfig, groupName string) {
+func EnsureResourceGroup(ctx context.Context, config *azconfig.AZConfig, groupName string) bool{
 	config.ResourceGroup = groupName
 	group, ok := createResourceGroup(ctx, *config)
 	if !ok {
-		logrus.Fatal("unable to create resource group")
+		logrus.Info("unable to create resource group, please specify a different name")
+		// Reset the value of ResourceGroup, so that if AskResourceGroupName is called again, the context will be "clean".
+		// See how EnsureResourceGroup is used in main.go
+		config.ResourceGroup = ""
+		return false
 	}
 
 	config.ResourceGroup = *group.Name
 	logrus.WithField("resourceGroup", config.ResourceGroup).Info("resource group created")
 	config.Save()
+	return true
 }
 
 // createResourceGroup creates a new azure resource group

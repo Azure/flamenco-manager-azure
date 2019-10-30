@@ -148,9 +148,18 @@ func main() {
 
 	// Determine what to create and what to assume is there.
 	// rg = Resource Group; sa = Storage Account; ba = Batch Account
-	rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup, config.DefaultName)
-	if createRG {
-		azresource.EnsureResourceGroup(ctx, &config, rgName)
+	
+	// Ask for Resource Group name. Keep prompting for a name until a valid name is provided
+	for {
+		rgName, createRG := azresource.AskResourceGroupName(ctx, config, cliArgs.resourceGroup, config.DefaultName)
+		if createRG {
+			ok := azresource.EnsureResourceGroup(ctx, &config, rgName)
+			if ok {
+				break
+			}
+		} else {
+			break
+		}	
 	}
 	azbatch.AskParametersAndSave(ctx, &config, config.DefaultName)
 	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
