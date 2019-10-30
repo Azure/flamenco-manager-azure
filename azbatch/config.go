@@ -56,13 +56,13 @@ func AskParametersAndSave(ctx context.Context, config *azconfig.AZConfig, defaul
 
 	fmt.Println()
 	fmt.Println("For sizes, see https://docs.microsoft.com/azure/batch/batch-pool-vm-sizes")
-	vmSize := textio.ReadLine(ctx, "Desired batch node VM size [Standard_F16s]")
+	vmSize := textio.ReadLine(ctx, "Batch pool VM size for Flamenco workers [Standard_F16s]")
 	if vmSize == "" {
 		vmSize = "Standard_F16s"
 	}
 
-	targetDedicatedNodes := textio.ReadNonNegativeInt(ctx, "Target dedicated node count [0]", true)
-	targetLowPriorityNodes := textio.ReadNonNegativeInt(ctx, "Target low-priority node count [0]", true)
+	targetDedicatedNodes := textio.ReadNonNegativeInt(ctx, "Number of dedicated Flamenco worker VMs [0]", true)
+	targetLowPriorityNodes := textio.ReadNonNegativeInt(ctx, "Number of low-priority Flamenco worker VMs [0]", true)
 
 	config.Batch = &azconfig.AZBatchConfig{
 		PoolID:                 poolID,

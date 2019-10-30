@@ -112,7 +112,7 @@ func ChooseVM(ctx context.Context, config *azconfig.AZConfig, vmName, defaultNam
 	if len(vmNames) > 0 {
 		vmName, isExisting = textio.Choose(ctx, vmNames, "Desired VM name, can be new or an existing name")
 	} else {
-		vmName = textio.ReadLineWithDefault(ctx, "Desired name for new VM", defaultName)
+		vmName = textio.ReadLineWithDefault(ctx, "Flamenco manager VM name", defaultName)
 	}
 	if vmName == "" {
 		logger.Fatal("no name given, aborting")
