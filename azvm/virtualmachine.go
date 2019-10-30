@@ -160,6 +160,13 @@ func loadSSHKey() string {
 	return string(sshBytes)
 }
 
+func askVMSize(ctx context.Context) compute.VirtualMachineSizeTypes {
+	// TODO(fsiddi): Ensure that the VM size is valid
+	containerServiceVMSizeType := textio.ReadLineWithDefault(ctx, "Desired Flamenco Manager VM size", "Standard_D12_v2")
+	// Verify is containerServiceVMSizeType is valid
+	return compute.VirtualMachineSizeTypes(containerServiceVMSizeType)
+}
+
 func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (compute.VirtualMachine, aznetwork.NetworkStack) {
 	sshKeyData := loadSSHKey()
 	adminPassword := RandStringBytes(32)
@@ -170,6 +177,7 @@ func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (com
 		"vmName":        vmName,
 	})
 
+	vmSize := askVMSize(ctx)
 	netstack := aznetwork.CreateNetworkStack(ctx, config, vmName)
 
 	logger.Info("creating virtual machine")
@@ -182,7 +190,7 @@ func createVM(ctx context.Context, config azconfig.AZConfig, vmName string) (com
 			Location: to.StringPtr(config.Location),
 			VirtualMachineProperties: &compute.VirtualMachineProperties{
 				HardwareProfile: &compute.HardwareProfile{
-					VMSize: compute.VirtualMachineSizeTypesStandardDS1V2,
+					VMSize: vmSize,
 				},
 				StorageProfile: &compute.StorageProfile{
 					ImageReference: &compute.ImageReference{

@@ -162,14 +162,9 @@ func main() {
 		}	
 	}
 	azbatch.AskParametersAndSave(ctx, &config, config.DefaultName)
-	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
-	if createSA && !azstorage.CheckAvailability(ctx, config, saName) {
-		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
-	}
-	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
-	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName, config.DefaultName)
 
-	// Create & update stuff.
+	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName, config.DefaultName)
+	// Create or update Manager VM
 	vm, networkStack := azvm.EnsureVM(ctx, config, vmName, vmExists)
 	publicIP := *networkStack.PublicIP.IPAddress
 	logrus.WithFields(logrus.Fields{
@@ -181,11 +176,16 @@ func main() {
 	}).Info("found network info")
 	azvm.WaitForReady(ctx, config, vmName)
 
+	saName, createSA := azstorage.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
+	if createSA && !azstorage.CheckAvailability(ctx, config, saName) {
+		logrus.WithField("storageAccountName", saName).Fatal("storage account name is not available")
+	}
 	if createSA {
 		azstorage.CreateAndSave(ctx, &config, saName)
 	}
 	azstorage.GetCredentials(ctx, &config)
 
+	baName, createBA := azbatch.AskAccountName(ctx, config, cliArgs.storageAccount, config.DefaultName)
 	if createBA {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}
