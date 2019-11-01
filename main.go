@@ -32,7 +32,6 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"github.com/Azure/flamenco-manager-azure/azauth"
 	"github.com/Azure/flamenco-manager-azure/azbatch"
 	"github.com/Azure/flamenco-manager-azure/azconfig"
@@ -43,6 +42,7 @@ import (
 	"github.com/Azure/flamenco-manager-azure/azvm"
 	"github.com/Azure/flamenco-manager-azure/flamenco"
 	"github.com/Azure/flamenco-manager-azure/textio"
+	"github.com/sirupsen/logrus"
 )
 
 const applicationName = "Azure Go Test"
