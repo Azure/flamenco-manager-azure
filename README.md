@@ -14,7 +14,7 @@ Flamenco Manager + Workers can now be easily deployed on Microsoft Azure.
 
 ## Deploying Flamenco on Azure
 
-First run the above preparation. The first time you run `flamenco-deploy-azure` you may be asked the
+First run the above preparation. The first time you run `flamenco-manager-azure` you may be asked the
 following information:
 
   - **Subscription ID**: If you have a single Azure subscription, it's used automatically. If you
@@ -29,8 +29,8 @@ following information:
     location of your choosing.
 
 After each prompt, your answer is stored in `azure_config.yaml`, and will be used in subsequent runs
-of `flamenco-deploy-azure`. If you want to change your answer, just delete the corresponding part of
-`azure_config.yaml` and re-run `flamenco-deploy-azure`.
+of `flamenco-manager-azure`. If you want to change your answer, just delete the corresponding part of
+`azure_config.yaml` and re-run `flamenco-manager-azure`.
 
 The deployment takes approximately 10 minutes.
 
@@ -67,7 +67,7 @@ Run:
 
     az login
     make
-    ./flamenco-deploy-azure -help
+    ./flamenco-manager-azure -help
 
 ## Publishing a new release
 

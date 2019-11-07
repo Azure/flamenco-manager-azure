@@ -36,7 +36,7 @@ import (
 )
 
 const (
-	configFile = "flamenco_azure_deploy.yaml"
+	configFile = "flamenco_manager_azure.yaml"
 )
 
 // AZBatchConfig has all the batch parameters.
