@@ -39,7 +39,7 @@ func ListResourceGroups(ctx context.Context, config azconfig.AZConfig) (groups [
 	groupsClient := resources.NewGroupsClient(config.SubscriptionID)
 	for iter, err := groupsClient.ListComplete(ctx, "", nil); iter.NotDone(); {
 		if err != nil {
-			logrus.Fatal("got error: %s", err)
+			logrus.Fatal("got error unable to list resource group")
 		}
 		groups = append(groups, iter.Value())
 	}
