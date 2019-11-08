@@ -24,15 +24,27 @@ package azresource
 
 import (
 	"context"
-
+	"fmt"
 	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2017-05-10/resources"
-	"github.com/Azure/go-autorest/autorest/azure"
-	"github.com/Azure/go-autorest/autorest/to"
-	"github.com/sirupsen/logrus"
 	"github.com/Azure/flamenco-manager-azure/azauth"
 	"github.com/Azure/flamenco-manager-azure/azconfig"
 	"github.com/Azure/flamenco-manager-azure/textio"
+	"github.com/Azure/go-autorest/autorest/azure"
+	"github.com/Azure/go-autorest/autorest/to"
+	"github.com/sirupsen/logrus"
 )
+
+//ListResourceGroups returns the Azure Resource Groups available to this subscription.
+func ListResourceGroups(ctx context.Context, config azconfig.AZConfig) (groups []resources.Group) {
+	groupsClient := resources.NewGroupsClient(config.SubscriptionID)
+	for iter, err := groupsClient.ListComplete(ctx, "", nil); iter.NotDone(); {
+		if err != nil {
+			logrus.Fatal("got error: %s", err)
+		}
+		groups = append(groups, iter.Value())
+	}
+	return
+}
 
 // AskResourceGroupName asks for a resource group, potentially overridable by a CLI arg.
 func AskResourceGroupName(
@@ -49,9 +61,29 @@ func AskResourceGroupName(
 		return config.ResourceGroup, false
 	}
 
-	desiredName = textio.ReadLineWithDefault(ctx, "Desired resource group", defaultAccountName)
-	if desiredName == "" {
-		logrus.Fatal("no resource group given, aborting")
+	available := ListResourceGroups(ctx, config)
+	switch len(available) {
+	case 0:
+		desiredName = textio.ReadLineWithDefault(ctx, "Desired resource group", defaultAccountName)
+		if desiredName == "" {
+			logrus.Fatal("no resource group given, aborting")
+		}
+	case 1:
+		desiredName = *available[0].Name
+		logrus.WithField("resource group", config.ResourceGroup).Info("using the only available resource groups")
+	default:
+		logrus.WithField("locationCount", len(available)).Info("multiple Azure resource groups available")
+
+		fmt.Println("Available resource groups:")
+		for idx, subs := range available {
+			fmt.Printf("    %2d: %s\n", idx+1, *subs.Name)
+		}
+		choice := textio.ReadNonNegativeInt(ctx, "Azure resource group number", false)
+		if choice < 1 || choice > len(available) {
+			logrus.WithField("index", choice).Fatal("that resource groups is not available")
+		}
+		logrus.WithField("resource group", config.Location).Info("using Azure resource groups")
+		desiredName = *available[choice-1].Name
 	}
 
 	return desiredName, true
