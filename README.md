@@ -1,8 +1,18 @@
-# Flamenco Deploy on Azure
+# Flamenco Manager on Azure
 
-Flamenco Manager + Workers can now be easily deployed on Microsoft Azure.
+[Flamenco](https://www.flamenco.io/) Manager and Workers can now be easily deployed on Microsoft Azure.
 
-## Preparation
+## Quickstart - Azure Shell
+
+- Login to [Azure Cloud Shell](https://shell.azure.com)
+- Select Bash environment
+- Run `bash <(wget -qO- https://raw.githubusercontent.com/Azure/flamenco-manager-azure/master/install)`
+- Follow the instructions
+
+
+## Quickstart - Localhost
+As an alternative to Azure Shell, it's possible to run Flamenco Manager Azure on a local
+machine. In that case:
 
 - Install [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest)
   and [Azure Batch Explorer](https://azure.github.io/BatchExplorer/).

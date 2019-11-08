@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+
+# Setup a private/public key pair (to copy data over to the manager VM)
+PRIVATE_KEY=~/.ssh/id_rsa_flamenco_manager
+FLAMENCO_MANAGER_AZURE_VERSION="0.6.4"
+
+if [ -f "$PRIVATE_KEY" ]; then
+    echo "$PRIVATE_KEY exist"
+else
+    echo "$PRIVATE_KEY does not exist, creating it"
+    ssh-keygen -t rsa -b 4096 -C "flamenco_manager" -f $PRIVATE_KEY -q -N ""
+    echo "$PRIVATE_KEY created"
+
+    echo "Start SSH agent"
+    eval "$(ssh-agent -s)"
+
+    echo "Add private key to SSH agent"
+    ssh-add $PRIVATE_KEY
+fi
+
+
+# Download the flamenco-manager-azure release to a temp location
+flamenco_manager_azure_name=flamenco-manager-azure-v$FLAMENCO_MANAGER_AZURE_VERSION
+flamenco_manager_azure_bundle=$flamenco_manager_azure_name-linux.tar.gz
+wget -P /tmp/ https://github.com/Azure/flamenco-manager-azure/releases/download/v$FLAMENCO_MANAGER_AZURE_VERSION/$flamenco_manager_azure_bundle
+# Extract flamenco-manager-azure in the home directory
+tar xvzf /tmp/$flamenco_manager_azure_bundle -C ~/
+rm /tmp/$flamenco_manager_azure_bundle
+cd ~/$flamenco_manager_azure_name
+# Start the Flamenco Manger configuration
+./flamenco-manager-azure
