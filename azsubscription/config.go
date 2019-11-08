@@ -45,7 +45,7 @@ func AskSubscriptionAndSave(ctx context.Context, config *azconfig.AZConfig, subs
 		return
 	}
 
-	available := List(ctx)
+	available := ListSubscriptions(ctx)
 	switch len(available) {
 	case 0:
 		logrus.Fatal("Your account does not have any subscription, visit the Azure website and create one.")

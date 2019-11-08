@@ -37,8 +37,8 @@ func getSubscriptionClient() subscriptions.Client {
 	return client
 }
 
-// List returns a list of subscription IDs.
-func List(ctx context.Context) []subscriptions.Subscription {
+// ListSubscriptions returns a list of subscription IDs.
+func ListSubscriptions(ctx context.Context) []subscriptions.Subscription {
 	logrus.Info("fetching Azure subscriptions")
 
 	client := getSubscriptionClient()
