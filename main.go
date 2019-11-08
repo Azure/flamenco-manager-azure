@@ -161,7 +161,6 @@ func main() {
 			break
 		}	
 	}
-	azbatch.AskParametersAndSave(ctx, &config, config.DefaultName)
 
 	vmName, vmExists := azvm.ChooseVM(ctx, &config, cliArgs.vmName, config.DefaultName)
 	// Create or update Manager VM
@@ -189,6 +188,7 @@ func main() {
 	if createBA {
 		azbatch.CreateAndSave(ctx, &config, baName)
 	}
+	azbatch.AskParametersAndSave(ctx, &config, config.DefaultName)
 
 	// Collect dynamically generated files (or bits of files).
 	fstab := azstorage.EnsureFileShares(ctx, config)
