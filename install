@@ -2,7 +2,7 @@
 
 # Setup a private/public key pair (to copy data over to the manager VM)
 PRIVATE_KEY=~/.ssh/id_rsa_flamenco_manager
-FLAMENCO_MANAGER_AZURE_VERSION="0.6.5"
+FLAMENCO_MANAGER_AZURE_VERSION="0.6.6"
 
 if [ -f "$PRIVATE_KEY" ]; then
     echo "$PRIVATE_KEY exist"
