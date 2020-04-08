@@ -82,7 +82,7 @@ Run:
 ## Publishing a new release
 
 Before creating a release, [create a Personal Access Token](https://github.com/settings/tokens)
-with API access, then save it to the file `.GitHubAccessToken`.
+with API access, then save it to the file `.gitHubAccessToken`.
 
 Run:
 
@@ -90,8 +90,8 @@ Run:
     git push --tags
     make release
 
-If you get an error "Ref is not specified" from Gitlab, you aren't building exactly the same tag as
-is available on Gitlab (so either your working directory is in a different Git revision, or you
+If you get an error "Ref is not specified" from GitHub, you aren't building exactly the same tag as
+is available on GitHub (so either your working directory is in a different Git revision, or you
 didn't push the tag you're trying to build).
 
 
