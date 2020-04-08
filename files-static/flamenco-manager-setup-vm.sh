@@ -7,8 +7,8 @@ FWORKER_VERSION="2.5"
 FFMPEG_VERSION="4.2.1"
 AZURE_PREEMPT_MONITOR_VERSION="1.1"
 
-BLENDER_TAR_BZ2=$(curl -s https://builder.blender.org/download/ | grep -oE "(blender-2\.81-[a-z0-9]+-linux-glibc[0-9]+-x86_64\.tar\.bz2)")
-BLENDER_TAR="${BLENDER_TAR_BZ2%.*}"
+BLENDER_TAR_XZ=$(curl -s https://builder.blender.org/download/ | grep -oE "(blender-2\.83-[a-z0-9]+-linux-glibc[0-9]+-x86_64\.tar\.xz)")
+BLENDER_TAR="${BLENDER_TAR_XZ%.*}"
 BLENDER_DIR="${BLENDER_TAR%.*}"
 
 WORKER_COMPONENTS_DIR="/mnt/flamenco-resources/apps"
@@ -86,7 +86,7 @@ wget -N \
     https://www.flamenco.io/download/flamenco-manager-${FMANAGER_VERSION}-linux.tar.gz \
     https://www.flamenco.io/download/flamenco-worker-${FWORKER_VERSION}-linux.tar.gz \
     https://flamenco.io/download/azure-preempt-monitor/azure-preempt-monitor-v${AZURE_PREEMPT_MONITOR_VERSION}-linux.tar.gz \
-    https://builder.blender.org/download/${BLENDER_TAR_BZ2} \
+    https://builder.blender.org/download/${BLENDER_TAR_XZ} \
     https://johnvansickle.com/ffmpeg/old-releases/ffmpeg-${FFMPEG_VERSION}-amd64-static.tar.xz
 
 
@@ -134,7 +134,7 @@ fi
 BLENDER_VERSION=${BLENDER_DIR/blender-}
 if [ ! -e $BLENDER_DIR ]; then
     echo "  - Blender ${BLENDER_VERSION} -> $WORKER_COMPONENTS_DIR"
-    tar jxf $COMPONENTS_DIR/${BLENDER_TAR_BZ2} \
+    tar Jxf $COMPONENTS_DIR/${BLENDER_TAR_XZ} \
         --atime-preserve=system --touch
     rm -f blender
     ln -s $BLENDER_DIR blender
