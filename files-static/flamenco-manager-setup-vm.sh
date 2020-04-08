@@ -3,8 +3,8 @@
 set -e
 
 FMANAGER_VERSION="2.7"
-FWORKER_VERSION="2.3.1"
 FFMPEG_VERSION="4.1.4"
+FWORKER_VERSION="2.5"
 AZURE_PREEMPT_MONITOR_VERSION="1.1"
 
 BLENDER_TAR_BZ2=$(curl -s https://builder.blender.org/download/ | grep -oE "(blender-2\.81-[a-z0-9]+-linux-glibc[0-9]+-x86_64\.tar\.bz2)")
