@@ -1,5 +1,10 @@
 # Flamenco Manager on Azure
 
+## PROJECT STATUS
+This toolkit is no longer actively maintained. Please see the main [Azure Batch GitHub repository](https://github.com/Azure/Batch) for more information about Azure Batch.
+
+## 
+
 [Flamenco](https://www.flamenco.io/) Manager and Workers can now be easily deployed on Microsoft Azure.
 
 ## Quickstart - Azure Shell
